@@ -442,7 +442,7 @@
     resumoCurto: 'Luzes e tomadas pelo interruptor, pelo aplicativo ou por voz.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
 
     requer: { secao: 'preparacao', resposta: 'sim', mensagem: 'Os interruptores inteligentes só podem ser escolhidos com a preparação elétrica para automação.' },
-    descricao: 'Permitem a integração com assistentes inteligentes (como a Alexa, da Amazon), para acionar luzes e tomadas remotamente, por comando de voz ou pelo celular. Escolha a cor e a linha e, depois, informe quantos pontos de cada tipo deseja automatizar. O valor de cada peça inclui a instalação e a configuração na rede.',
+    descricao: 'Permitem ligar luzes e tomadas pelo celular ou por voz. Escolha a cor e a linha e informe quantas peças de cada tipo deseja. O valor de cada peça inclui a instalação e a configuração na rede.',
     linhas: LINHAS_INTERRUPTOR,
     linhasMultiplas: true,
     nota: 'Somente os pontos pré-existentes no projeto assinado na 1ª etapa de personalização podem receber automação.',
@@ -458,8 +458,8 @@
         'loft-206': ['Loft', 'Banheiro suíte'],
         'lofts-202-205': ['Loft', 'Banheiro suíte'],
 
-        'final-02': ['Living', 'Quarto de solteiro', 'Suíte', 'Banheiro suíte', 'Sacada'],
-        'final-07': ['Living', 'Quarto de solteiro', 'Suíte', 'Banheiro suíte', 'Sacada']
+        'final-02': ['Living', 'Banheiro suíte'],
+        'final-07': ['Living', 'Banheiro suíte']
       }
     },
     itens: [
@@ -482,7 +482,7 @@
     titulo: 'Preparação elétrica para automação',
     resumoCurto: 'Deixa a fiação pronta para automatizar a iluminação.', inclui: ['fiacao'], naoInclui: 'produtos, instalação e configuração de dispositivos',
     nome: 'Passagem de fiação: neutro nas caixas de interruptor dos pontos de iluminação',
-    descricao: 'Passagem de fiação feita pela ZR3 durante a obra: deixamos o neutro nas caixas de interruptor dos pontos de iluminação, mantendo as caixas convencionais. É necessária para os interruptores e tomadas inteligentes desta etapa e também para quem prefere automatizar por conta própria depois da entrega, com dispositivos sem fio (Wi-Fi ou Zigbee). Não inclui produtos, instalação nem configuração de dispositivos.',
+    descricao: 'Passagem do fio neutro nas caixas de interruptor dos pontos de iluminação, feita pela ZR3 durante a obra. É necessária para os interruptores e tomadas inteligentes desta etapa e também para quem quiser automatizar por conta própria depois da entrega. Não inclui produtos nem instalação de dispositivos.',
     imagem: 'assets/img/preparacao-fiacao.jpg',
     valor: 425,
     valorPorGrupo: { 'final-02': 350, 'final-07': 350, 'loft-201': 350, 'loft-206': 350, 'lofts-202-205': 350 },
@@ -510,7 +510,7 @@
     titulo: 'Automação do exaustor central da churrasqueira',
     resumoCurto: 'Aciona o exaustor central pelo aplicativo, por voz ou por interruptor.', inclui: ['produto', 'instalacao', 'configuracao'],
     nome: 'Acionamento automatizado do exaustor central',
-    descricao: 'Cada apartamento tem um exaustor individual, que liga junto com a luminária interna da churrasqueira. Ele sozinho não basta: o exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ser ligado sempre que você usar a churrasqueira, em qualquer condição de vento, para a fumaça não voltar para dentro dos apartamentos. O comando dele fica na cobertura, no andar acima do último pavimento. Com a automação, você liga o exaustor central de dentro da sua unidade.',
+    descricao: 'O exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ficar ligado sempre que você usar a churrasqueira, com qualquer vento, para a fumaça não voltar para os apartamentos. O comando dele fica na cobertura; com a automação, você liga de dentro da sua unidade.',
     avisoNao: { titulo: 'Tem certeza?', texto: 'Sem a automação, para usar a churrasqueira você vai precisar subir até a cobertura para ligar o exaustor central. Sem ele ligado, a fumaça pode voltar para dentro dos apartamentos.' },
     imagem: 'assets/img/exaustor-app.jpg',
     valor: 75,
@@ -555,9 +555,9 @@
     aba: 'Programação da assistente de voz',
     cheki: '4.9.1',
     titulo: 'Programação da assistente de voz',
-    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho Echo/Alexa, adquirido pelo cliente',
+    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho da assistente de voz (Amazon Echo), adquirido pelo cliente',
     nome: 'Programação da assistente de voz: criação de cenas e rotinas',
-    descricao: 'Criação de cenas e rotinas e integração dos seus dispositivos automatizados à assistente de voz (ex.: “boa noite” apaga as luzes e fecha as persianas). Sem a programação, os dispositivos funcionam normalmente pelo interruptor e pelo aplicativo, já configurados na rede, mas sem cenas prontas. O dispositivo Echo/Alexa deve ser adquirido pelo cliente.',
+    descricao: 'Cenas e rotinas por voz para os seus dispositivos automatizados (ex.: “boa noite” apaga as luzes e fecha as persianas). Sem a programação, tudo funciona pelo interruptor e pelo aplicativo, só sem as cenas prontas. O aparelho (Amazon Echo) é adquirido pelo cliente.',
     imagem: 'assets/img/echo-dot.jpg',
     valor: 75,
     ajuda: 'alexa',
@@ -565,8 +565,8 @@
     rotuloNao: 'Não quero',
     blocos: [
       { titulo: 'O que está incluído', itens: ['Integração dos dispositivos automatizados da unidade à assistente de voz', 'Criação de cenas e rotinas (ex.: “boa noite” apaga tudo e fecha as persianas)', 'Comandos de voz para luzes, tomadas e persianas automatizadas'] },
-      { titulo: 'O que é necessário', itens: ['Dispositivo Echo/Alexa adquirido à parte pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta Amazon e aplicativo Alexa no celular'] },
-      { titulo: 'Limites da integração', itens: ['Só são integrados dispositivos compatíveis com a Alexa.', 'A programação é feita na visita técnica gratuita, depois que a rede Wi-Fi da unidade estiver instalada.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
+      { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz (Amazon Echo) adquirido à parte pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta Amazon e aplicativo Alexa no celular'] },
+      { titulo: 'Limites da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita, depois que a rede Wi-Fi da unidade estiver instalada.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
     ]
   };
 
@@ -589,6 +589,8 @@
       { src: 'assets/img/jw-hub-zg25-verso.jpg', legenda: 'Verso: modelo SA-ZG25, entrada 5 V / 1 A, com furo para fixar na parede.' }
     ],
     valor: 300,
+
+    avisoAcrescimo: 'com o hub, entra o acréscimo de {pct}% do protocolo Zigbee sobre os dispositivos inteligentes.',
     ajuda: 'zigbee',
     rotuloSim: 'Quero o hub',
     rotuloNao: 'Não quero',
@@ -602,12 +604,12 @@
   const CONTROLE_UNIVERSAL = {
     tipo: 'quantidades',
     id: 'controle-universal',
-    aba: 'Automatizador',
+    aba: 'Controle universal',
     titulo: 'Controle universal Smart Wi-Fi',
     resumoCurto: 'Comanda o ar-condicionado e a TV pelo celular e por voz.', inclui: ['produto', 'instalacao', 'configuracao'],
     descricao: 'Faz a intermediação de dispositivos mais antigos, sem integração nativa à automação (como ar-condicionado e televisão), permitindo controlá-los remotamente. Um por ambiente.',
     itens: [
-      { id: 'controle-universal', cheki: '4.9.4', nome: 'Automatizador de ar-condicionado e TV', subtitulo: 'Nova Digital · Controle Universal Mini IR · por ambiente', imagem: 'assets/img/nd-controle-mini-ir.jpg', valor: 200, max: 6,
+      { id: 'controle-universal', cheki: '4.9.4', nome: 'Controle universal Smart Wi-Fi', subtitulo: 'Nova Digital · Mini IR · para ar-condicionado e TV · por ambiente', imagem: 'assets/img/nd-controle-mini-ir.jpg', valor: 200, max: 6,
         galeria: [
           { src: 'assets/img/nd-controle-mini-ir.jpg', legenda: 'Controle Universal Mini IR White, Nova Digital, alimentado por USB.' },
           { src: 'assets/img/nd-controle-mini-ir-caixa.jpg', legenda: 'Controle Universal Mini IR White com a embalagem.' },
@@ -625,7 +627,7 @@
     aba: 'Minipad',
     titulo: 'Minipad inteligente',
     nomeCurto: 'Minipad inteligente',
-    resumoCurto: 'Minipad: painel com Alexa integrada para controlar a automação.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
+    resumoCurto: 'Minipad: painel com assistente de voz integrada para controlar a automação.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
 
     requer: { secao: 'preparacao', resposta: 'sim', mensagem: 'O minipad é ligado com fase e neutro e só pode ser escolhido com a preparação elétrica para automação.' },
     descricao: 'Painel para centralizar o controle da automação. O valor inclui a instalação e a configuração na rede.',
@@ -710,7 +712,7 @@
     id: 'observacoes',
     titulo: 'Observações para a equipe de personalização',
     descricao: 'Algum detalhe, dúvida ou pedido que não foi contemplado nas etapas anteriores? Escreva aqui. Pedidos especiais dependem de análise técnica e orçamento.',
-    placeholder: 'Ex.: prefiro o minipad ao lado da porta de entrada; quero confirmar se o automatizador atende o ar-condicionado do quarto…',
+    placeholder: 'Ex.: prefiro o minipad ao lado da porta de entrada; quero confirmar se o controle universal atende o ar-condicionado do quarto…',
     max: 1200
   };
 
@@ -764,7 +766,7 @@
     zigbee: { titulo: 'Zigbee', texto: 'Protocolo sem fio de baixo consumo, próprio para automação. Os dispositivos se conectam a um hub em vez de ao roteador, o que melhora a estabilidade em casas com muitas automações.' },
     wifi: { titulo: 'Wi-Fi', texto: 'Os dispositivos se conectam diretamente ao roteador da casa. Não precisam de hub, mas cada um ocupa uma conexão da rede.' },
     caixa: { titulo: 'Caixa 4x2 e 4x4', texto: 'São os tamanhos das caixas embutidas na parede (em polegadas). A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.' },
-    alexa: { titulo: 'Alexa', texto: 'Assistente de voz da Amazon presente nos dispositivos Echo. O aparelho deve ser adquirido pelo cliente; a ZR3 oferece a programação.' },
+    alexa: { titulo: 'Assistente de voz', texto: 'Assistente da Amazon (Alexa), presente nos aparelhos Echo, que obedece a comandos falados. O aparelho deve ser adquirido pelo cliente; a ZR3 oferece a programação.' },
     cub: { titulo: 'CUB', texto: 'Custo Unitário Básico da construção civil. No pagamento parcelado, as parcelas são reajustadas mensalmente pelo CUB.' },
     consulta: { titulo: 'Sob consulta', texto: 'O valor depende de uma definição da ZR3: por exemplo, quando você pediu para a equipe escolher o modelo, pediu ajuda para quantificar ou ainda falta confirmar uma informação da sua unidade. Sua escolha fica registrada e a ZR3 informa o valor na revisão do orçamento, antes da sua aprovação.' }
   };
@@ -819,6 +821,8 @@
         mensagemWhats: 'Olá! Sou {nome}, da unidade {unidade} do {empreendimento}. Segue em anexo o PDF da minha personalização da 3ª etapa (protocolo {protocolo}).',
         telefone: '(47) 4101-0499'
       },
+
+      taxaRevisaoProjeto: 200,
       pagamento: {
         descontoAVistaPct: 5,
         parcelasMax: 12,
@@ -911,7 +915,7 @@
             id: 'alexa-sem-dispositivos',
             quando: { secao: 'alexa', resposta: 'sim' },
             seNenhum: ['auto-interruptores', 'controle-universal', 'outros-inteligentes', 'exaustor', 'persianas'],
-            mensagem: 'Você escolheu a programação da Alexa, mas nenhum dispositivo automatizado. A Alexa poderá tocar música e responder perguntas, mas não terá o que comandar na unidade.'
+            mensagem: 'Você escolheu a programação da assistente de voz, mas nenhum dispositivo automatizado. A assistente poderá tocar música e responder perguntas, mas não terá o que comandar na unidade.'
           },
           {
             id: 'zigbee-sem-dispositivos',
@@ -928,7 +932,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.0',
+    versao: '1.1',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',
@@ -956,7 +960,7 @@
       'Confirme qual é a unidade que está sendo personalizada, pois os itens são disponibilizados de acordo com o final da unidade. Em caso de dúvida, consulte o seu contrato de compra e venda ou fale com a ZR3.',
       'Para que a ZR3 receba as suas escolhas, é necessário enviar o PDF gerado ao final à equipe de personalização. Sem esse envio, as escolhas ficam salvas apenas neste dispositivo.',
       'Se o cliente não retornar dentro do prazo, a unidade é executada no padrão da construtora e não pode mais ser personalizada.',
-      'Alterações solicitadas após a assinatura do aditivo estão sujeitas a taxa de revisão de projeto e à análise de viabilidade da obra; se forem possíveis, podem gerar custos de retrabalho.',
+      'Alterações solicitadas após a assinatura do aditivo estão sujeitas à taxa de revisão de projeto ({taxaRevisao}) e à análise de viabilidade da obra; se forem possíveis, podem gerar custos de retrabalho.',
       'O atendimento desta etapa é feito online através do WhatsApp. Em caso de dúvidas, entre em contato conosco.'
     ],
     glossario: GLOSSARIO,

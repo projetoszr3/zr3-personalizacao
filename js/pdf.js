@@ -172,7 +172,7 @@
     const pend = calc.consulta;
     const pg = emp.pagamento || {};
     fonte(7.5, 'normal');
-    const pgLs = pg.texto ? doc.splitTextToSize(t('Condições de pagamento: ' + pg.texto), CW - 10) : [];
+    const pgLs = pg.texto && calc.total > 0 ? doc.splitTextToSize(t('Condições de pagamento: ' + pg.texto), CW - 10) : [];
     fonte(8, 'bold');
     const pendLs = pend.length ? doc.splitTextToSize(t('Dependem de orçamento/confirmação: ' + pend.map((l) => l.item).join('; ') + '.'), CW - 10) : [];
     const hT = 18 + (calc.aVista != null && calc.total > 0 ? 6 : 0) + pendLs.length * 3.8 + pgLs.length * 3.6 + 4;
@@ -203,13 +203,13 @@
       blocoTexto(et.servicos.titulo, et.servicos.itens.map((x, i) => `${i + 1}. ${x.titulo}: ${x.texto} Quem e quando: ${x.quem} Custo: ${x.custo}`).concat(et.servicos.nota ? [et.servicos.nota] : []));
     });
     E.aceites(S, emp).forEach((a) => blocoTexto('Termo aceito pelo cliente: ' + a.titulo, [a.texto, 'Aceito pelo cliente em ' + data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) + '.']));
-    if ((cfg.regrasGerais || []).length) blocoTexto('Instruções gerais', cfg.regrasGerais.map((r) => '• ' + r));
+    if ((cfg.regrasGerais || []).length) blocoTexto('Instruções gerais', E.regrasGerais(cfg, emp).map((r) => '• ' + r));
 
     fonte(8, 'normal');
     const av = doc.splitTextToSize(t(cfg.textos.avisoPdf), CW - 10);
     fonte(8, 'bold');
     const prox = doc.splitTextToSize(t(`Envie este documento à ${(emp.contato && emp.contato.equipe) || 'equipe de personalização'}${emp.contato && emp.contato.email ? ' (' + emp.contato.email + ')' : ''}.`), CW - 10);
-    quebra(av.length * 3.8 + prox.length * 3.8 + 12);
+    quebra(av.length * 3.8 + prox.length * 3.8 + 14 + 22);
     cor(LINE, 'draw'); doc.roundedRect(M, y, CW, av.length * 3.8 + prox.length * 3.8 + 9, 1.5, 1.5, 'S');
     fonte(8, 'normal', [52, 64, 84]); doc.text(av, M + 5, y + 5.5);
     fonte(8, 'bold', NAVY); doc.text(prox, M + 5, y + 6 + av.length * 3.8);

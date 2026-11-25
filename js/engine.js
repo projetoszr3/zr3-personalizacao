@@ -163,7 +163,7 @@
   E.nomeLinha = (ln) => (ln ? `${ln.linha.nome}${ln.linha.comercial ? ` (linha ${ln.linha.comercial})` : ''} ${ln.linha.fabricante || ''}`.trim() + (ln.cor ? `, ${ln.cor.nome.toLowerCase()}` : '') : '');
 
   E.codigoTabela = (cfg) => {
-    const K = new Set(['valor', 'precos', 'percentual', 'valorPorGrupo', 'valorPorPorta', 'descontoAVistaPct', 'parcelaMinima', 'parcelasMax', 'sobre', 'porPeca', 'inclusoFinais', 'personalizadoFinais', 'semIntegracao', 'cobranca', 'interruptor']);
+    const K = new Set(['valor', 'precos', 'percentual', 'valorPorGrupo', 'valorPorPorta', 'descontoAVistaPct', 'parcelaMinima', 'parcelasMax', 'sobre', 'porPeca', 'inclusoFinais', 'personalizadoFinais', 'semIntegracao', 'cobranca', 'interruptor', 'taxaRevisaoProjeto']);
     const partes = [];
     const andar = (o, cam) => {
       if (Array.isArray(o)) o.forEach((x, i) => andar(x, cam + '/' + ((x && x.id) || i)));
@@ -174,6 +174,11 @@
     for (let i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619); }
     return (h >>> 0).toString(36).toUpperCase().padStart(7, '0');
   };
+
+  E.regrasGerais = (cfg, emp) => ((cfg && cfg.regrasGerais) || []).map((r) => {
+    const v = emp && emp.taxaRevisaoProjeto;
+    return v ? r.replace('{taxaRevisao}', E.brl(v)) : r.replace(/ ?\(\{taxaRevisao\}\)/, '');
+  });
 
   E.hoje = () => new Date();
   const dataIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

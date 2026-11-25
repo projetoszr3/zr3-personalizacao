@@ -76,12 +76,26 @@
   let ultimoPdf = null;
   let telaSalva = null;
 
+  function estadoUtil(s) {
+    const obj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
+    if (!obj(s) || s.v !== 1 || !E.empreendimento(CFG, s.empId) || !obj(s.cliente) || !obj(s.escolhas)) return false;
+    if (!obj(s.visitadas)) s.visitadas = {};
+    if (typeof s.tela !== 'string') s.tela = 'inicio';
+    ['nome', 'unidade', 'contato', 'contatoTipo'].forEach((k) => { if (s.cliente[k] != null && typeof s.cliente[k] !== 'string') s.cliente[k] = String(s.cliente[k]); });
+    Object.keys(s.escolhas).forEach((k) => { if (!obj(s.escolhas[k])) delete s.escolhas[k]; });
+    try {
+      const e = E.empreendimento(CFG, s.empId);
+      E.calcular(s, e); E.avisos(s, e);
+      E.telas(e, s).forEach((t) => E.validarTela(s, CFG, e, t));
+      return true;
+    } catch (err) { console.warn('Escolhas salvas descartadas:', err); return false; }
+  }
   function carregar() {
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s && s.v === 1 && E.empreendimento(CFG, s.empId)) { if (!s.unidadeBase && s.cliente && s.cliente.unidade) s.unidadeBase = s.cliente.unidade; return s; }
+        if (estadoUtil(s)) { if (!s.unidadeBase && s.cliente.unidade) s.unidadeBase = s.cliente.unidade; return s; }
       }
     } catch (e) {   }
     return E.novoEstado(CFG);
@@ -221,7 +235,7 @@
     $toast.className = 'show ' + tipo;
     $toast.textContent = msg;
     clearTimeout(toastT);
-    toastT = setTimeout(() => ($toast.className = ''), 3600);
+    toastT = setTimeout(() => ($toast.className = ''), Math.min(6000, 2600 + msg.length * 25));
   }
   let modalVoltaFoco = null;
   function abrirModal(html, { titulo = '', largo = false } = {}) {
@@ -301,6 +315,12 @@
   }
 
   function render() {
+    try { renderTela(); } catch (err) {
+      console.error(err);
+      $app.innerHTML = `<main id="conteudo" class="wrap"><div class="card falha"><h1>Não foi possível abrir esta tela</h1><p>As escolhas salvas neste aparelho parecem incompletas. Toque abaixo para começar de novo.</p><button type="button" class="btn primary" data-act="recomecar-falha">Começar do zero</button></div></main>`;
+    }
+  }
+  function renderTela() {
     const e = emp();
     const tela = S.tela;
     let corpo = '';
@@ -338,7 +358,7 @@
   function cabecalho(e) {
     return `<header class="topbar">
       <div class="wrap topbar-in">
-        <button type="button" class="brand" data-act="goto" data-tela="inicio" aria-label="Voltar à página inicial">
+        <button type="button" class="brand" data-act="goto" data-tela="inicio" aria-label="Personalização 3ª etapa${e ? ' · ' + esc(e.nome) : ''} – página inicial">
           <img src="${esc(CFG.empresa.logo)}" alt="ZR3 Empreendimentos">
           <span class="brand-txt"><strong>Personalização</strong><small>3ª etapa${e ? ' · ' + esc(e.nome) : ''}</small></span>
         </button>
@@ -384,9 +404,9 @@
     const ultimo = S.tela === 'resumo';
     const totalTxt = `<span class="tot-l">Total parcial</span><strong>${brl(c.total)}</strong>${c.consulta.length ? `<span class="tot-c">+ ${c.consulta.length} sob consulta</span>` : ''}`;
     return `<div class="bottombar"><div class="wrap bottombar-in">
-      <button type="button" class="btn ghost" data-act="voltar" ${i <= 0 ? 'disabled' : ''}>${ic('left')}<span>Voltar</span></button>
+      <button type="button" class="btn ghost bb-btn" data-act="voltar" aria-label="Voltar" ${i <= 0 ? 'disabled' : ''}>${ic('left')}<span class="bb-tx">Voltar</span></button>
       <div class="tot" aria-live="polite">${totalTxt}</div>
-      ${ultimo ? '<span class="btn-spacer"></span>' : `<button type="button" class="btn primary" data-act="avancar"><span>${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}</span>${ic('right')}</button>`}
+      ${ultimo ? '<span class="btn-spacer"></span>' : `<button type="button" class="btn primary bb-btn" data-act="avancar" aria-label="${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}"><span class="bb-tx">${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}</span>${ic('right')}</button>`}
     </div></div>`;
   }
 
@@ -407,7 +427,7 @@
 
           ? HOSPEDADO
             ? `<a class="yt-facade yt-link" href="https://www.youtube.com/watch?v=${esc(youtubeId(e.videoUrl))}" target="_blank" rel="noopener"><span class="yt-play">${ic('play')}</span><span class="yt-label">Assistir ao vídeo explicativo no YouTube</span></a>`
-            : `<button type="button" class="yt-facade" data-act="video-play" aria-label="Reproduzir vídeo explicativo da 3ª etapa">
+            : `<button type="button" class="yt-facade" data-act="video-play" aria-label="Assistir ao vídeo explicativo da 3ª etapa">
               <img class="yt-thumb" src="https://i.ytimg.com/vi/${esc(youtubeId(e.videoUrl))}/hqdefault.jpg" alt="" loading="lazy">
               <span class="yt-play">${ic('play')}</span><span class="yt-label">Assistir ao vídeo explicativo</span>
             </button>`
@@ -462,7 +482,7 @@
   }
 
   function regrasHtml(semTitulo) {
-    const r = CFG.regrasGerais || [];
+    const r = E.regrasGerais(CFG, emp());
     if (!r.length) return '';
     const [primeira, ...demais] = r;
     return `${semTitulo ? '' : '<h4 class="regras-t">Instruções gerais</h4>'}<div class="regra-destaque">${ic('alerta')}<p>${esc(primeira)}</p></div>${demais.length ? `<ul class="bul regras">${demais.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}`;
@@ -1019,7 +1039,7 @@
   function videoBtn(v, cls = '') {
     if (!v || !v.arquivo || captura) return '';
     let i = VIDEOS.indexOf(v); if (i < 0) { VIDEOS.push(v); i = VIDEOS.length - 1; }
-    return `<button type="button" class="vid-btn ${cls}" data-act="video" data-v="${i}" aria-label="Ver vídeo: ${esc(v.titulo || '')}"><span class="vid-th">${v.capa ? `<img src="${esc(v.capa)}" alt="" loading="lazy">` : ''}<span class="vid-play">${ic('play')}</span></span><span class="vid-tx"><strong>Ver vídeo</strong><small>${esc(v.titulo || '')}</small></span></button>`;
+    return `<button type="button" class="vid-btn ${cls}" data-act="video" data-v="${i}" aria-label="Ver vídeo ${esc(v.titulo || '')}"><span class="vid-th">${v.capa ? `<img src="${esc(v.capa)}" alt="" loading="lazy">` : ''}<span class="vid-play">${ic('play')}</span></span><span class="vid-tx"><strong>Ver vídeo</strong><small>${esc(v.titulo || '')}</small></span></button>`;
   }
   function abrirVideo(i) {
     const v = VIDEOS[i]; if (!v) return;
@@ -1333,14 +1353,29 @@
       <p class="subtotal">Subtotal: <strong>${brl(sub)}</strong>${consulta ? ' + itens sob consulta' : ''}</p>`;
   }
 
+  function acrescimoDoSim(e, s) {
+    try {
+      const sim = JSON.parse(JSON.stringify(S)), nao = JSON.parse(JSON.stringify(S));
+      sim.escolhas[s.id] = Object.assign({}, sim.escolhas[s.id], { resposta: 'sim' }); delete sim.escolhas[s.id].auto;
+      nao.escolhas[s.id] = Object.assign({}, nao.escolhas[s.id], { resposta: 'nao' }); delete nao.escolhas[s.id].auto;
+      return Math.max(0, Math.round((E.calcular(sim, e).total - E.calcular(nao, e).total - (s.valor || 0)) * 100) / 100);
+    } catch (err) { return 0; }
+  }
+  function avisoAcrescimo(e, s) {
+    if (!s.avisoAcrescimo || E.dispensado(S, e, s)) return '';
+    const v = acrescimoDoSim(e, s);
+    const pct = ((e.regras.acrescimos || [])[0] || {}).percentual || 0;
+    return `<div class="callout warn">${ic('alerta')}<p><strong>Atenção ao custo:</strong> ${esc(s.avisoAcrescimo.replace('{pct}', pct))}${v > 0 ? ` Com o que você já escolheu: <strong>+ ${brl(v)}</strong> (hub e acréscimo: + ${brl(v + (s.valor || 0))}).` : ''}</p></div>`;
+  }
   function secOpcional(e, s) {
     const ex = E.exigidos(S, e)[s.id];
     const r = E.resposta(S, e, s);
+    const acr = s.avisoAcrescimo && !E.dispensado(S, e, s) ? acrescimoDoSim(e, s) : 0;
     const temDet = (s.blocos && s.blocos.length) || (s.galeria && s.galeria.length);
     const botoes = ex
       ? `<div class="locked">${ic('cadeado')}<div><strong>Incluído automaticamente</strong><p>${esc(ex.mensagem)}</p></div></div>`
       : `<div class="choices c2 ${errDe(s.id) ? 'has-error' : ''}">
-          ${opcaoRadio('resp', `data-s="${s.id}" data-v="sim"`, r === 'sim', esc(s.rotuloSim || 'Sim, quero'), s.valor == null ? 'Valor sob consulta' : s.valor ? '+ ' + brl(s.valor) : 'Sem custo')}
+          ${opcaoRadio('resp', `data-s="${s.id}" data-v="sim"`, r === 'sim', esc(s.rotuloSim || 'Sim, quero'), s.valor == null ? 'Valor sob consulta' : s.valor ? '+ ' + brl(s.valor) + (acr > 0 ? ` + ${brl(acr)} (acréscimo Zigbee)` : '') : 'Sem custo')}
           ${opcaoRadio('resp', `data-s="${s.id}" data-v="nao"`, r === 'nao', esc(s.rotuloNao || 'Não quero'))}
         </div>`;
     return `<div class="card opt ${r === 'sim' ? 'on' : ''}">
@@ -1357,8 +1392,9 @@
         <div class="blocos">${(s.blocos || []).map((b) => `<div class="bloco"><h4>${esc(b.titulo)}</h4>${b.texto ? `<p>${esc(b.texto)}</p>` : ''}${listaHtml(b.itens)}</div>`).join('')}</div>
         ${s.galeria ? `<div class="thumbs">${E.galeria(s).map((g) => `<button type="button" data-act="zoom" data-src="${esc(g.src)}" data-legenda="${esc(g.legenda)}" data-nota="${esc(g.nota)}" aria-label="Ampliar">${img(g.src, s.nome)}</button>`).join('')}</div>` : ''}
       </details>` : ''}
-      ${botoes}
       ${E.dispensado(S, e, s) ? `<div class="callout info">${ic('info')}<p>${esc(s.dispensadoPor.texto)}</p></div>` : ''}
+      ${avisoAcrescimo(e, s)}
+      ${botoes}
       ${marcaInfo(e, s, r)}
       ${r === 'nao' && s.avisoNao && !ex && (S.avisosNao || {})[s.id] ? `<div class="callout warn aviso-nao" role="alert" tabindex="-1">${ic('alerta')}<p><strong>${esc(s.avisoNao.titulo || 'Tem certeza?')}</strong> ${esc(s.avisoNao.texto)}</p></div>` : ''}
       ${r === 'sim' && s.acionamento ? acionamentoHtml(e, s) : ''}
@@ -1562,7 +1598,7 @@
       <div class="t-row big"><span>Total estimado (pré-orçamento)</span><strong>${brl(calc.total)}</strong></div>
       ${calc.aVista != null && calc.total > 0 ? `<div class="t-row"><span>Estimativa à vista (${pg.descontoAVistaPct}% de desconto)</span><strong>${brl(calc.aVista)}</strong></div>` : ''}
       ${calc.consulta.length ? `<div class="t-row"><span>Itens que dependem de orçamento ou confirmação ${helpBtn('consulta')}</span><strong>${calc.consulta.length}</strong></div><ul class="t-list">${calc.consulta.map((l) => `<li>${esc(l.item)}</li>`).join('')}</ul>` : ''}
-      ${pg.texto ? `<p class="hint">${esc(pg.texto)} ${helpBtn('cub')}</p>` : ''}
+      ${pg.texto && calc.total > 0 ? `<p class="hint">${esc(pg.texto)} ${helpBtn('cub')}</p>` : ''}
     </section>
     <section class="card finalize">
       <label class="check big"><input type="checkbox" data-act="confirmar" ${S.confirmado ? 'checked' : ''}>
@@ -1625,10 +1661,12 @@
     abrirModal(html, { titulo: o.nome, largo: true });
   }
 
+  document.addEventListener('pointerdown', (ev) => { if ($toast.className && !$toast.contains(ev.target)) { clearTimeout(toastT); $toast.className = ''; } }, true);
   document.addEventListener('click', (ev) => {
     const t = ev.target.closest('[data-act]');
     if (!t) return;
     const a = t.dataset.act;
+    if (a === 'recomecar-falha') { try { localStorage.removeItem(STORE_KEY); } catch (err) {   } S = E.novoEstado(CFG); S.tela = 'inicio'; render(); return; }
     const e = emp();
 
     if (t.tagName === 'INPUT' || t.tagName === 'SELECT') return;
@@ -2110,6 +2148,15 @@
 
   const SRC_CONFIG = (() => { const sc = document.querySelector('script[src*="config.js"]'); return sc && /^https?:$/.test(location.protocol) ? sc.getAttribute('src') : null; })();
   let tabelaConferidaEm = null;
+
+  function assinaturaOrcamento() {
+    try {
+      const e = emp(); if (!e || !S.cliente.unidade) return '';
+      const c = E.calcular(S, e);
+      const pend = telas().slice(1, -1).map((t) => E.validarTela(S, CFG, e, t).length).join(',');
+      return JSON.stringify([c.total, c.consulta.length, c.linhas.map((l) => [l.secao && l.secao.id, l.item, l.qtd, l.total, l.status]), pend]);
+    } catch (err) { return 'erro'; }
+  }
   async function conferirTabela() {
     if (!SRC_CONFIG) return { status: 'sem-servidor' };
     try {
@@ -2120,9 +2167,12 @@
       if (!novo || !Array.isArray(novo.empreendimentos)) throw new Error('config inválido');
       const precoMudou = E.codigoTabela(novo) !== E.codigoTabela(CFG);
       const mudou = JSON.stringify(novo) !== JSON.stringify(CFG);
+
+      const antes = mudou ? assinaturaOrcamento() : '';
       if (mudou) { Object.keys(CFG).forEach((k) => delete CFG[k]); Object.assign(CFG, novo); }
+      const orcamentoMudou = mudou && assinaturaOrcamento() !== antes;
       tabelaConferidaEm = new Date();
-      return { status: precoMudou ? 'valores' : mudou ? 'textos' : 'ok' };
+      return { status: precoMudou || orcamentoMudou ? 'valores' : mudou ? 'textos' : 'ok' };
     } catch (err) {
       console.warn('Tabela de valores não conferida:', err);
       return { status: 'sem-conexao' };
@@ -2137,10 +2187,11 @@
     const conf = await conferirTabela();
     if (conf.status === 'valores') {
       S.confirmado = false; salvar(false); render();
-      abrirModal(`<p>A tabela de valores da ZR3 foi atualizada desde que você abriu esta página. O resumo já mostra os valores atuais.</p><p>Confira o resumo, marque de novo a confirmação e gere o PDF.</p><div class="modal-act"><button type="button" class="btn primary" data-act="fechar-modal">Conferir o resumo</button></div>`, { titulo: 'Valores atualizados' });
+      abrirModal(`<p>A ZR3 atualizou valores ou regras desde que você abriu esta página, e isso mudou o seu orçamento. O resumo já mostra a versão atual.</p><p>Confira o resumo, marque de novo a confirmação e gere o PDF.</p><div class="modal-act"><button type="button" class="btn primary" data-act="fechar-modal">Conferir o resumo</button></div>`, { titulo: 'Valores atualizados' });
       return;
     }
     if (conf.status === 'textos') render();
+    { const ts = telas(), pend = ts.slice(1, -1).find((t) => E.validarTela(S, CFG, emp(), t).length); if (pend) { S.confirmado = false; salvar(false); ir(pend, { forcar: true, mostrarErros: true }); return; } }
     const btn2 = document.querySelector('[data-act="gerar"]');
     if (btn2) { btn2.disabled = true; btn2.innerHTML = '<span class="spin" aria-hidden="true"></span><span>Gerando PDF…</span>'; }
     try {

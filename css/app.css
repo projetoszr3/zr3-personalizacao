@@ -934,3 +934,38 @@ button.link.qmais, .rgroup button.link, .callout button.link { min-height: 44px;
 .pesquisa > .muted { margin: 0 0 4px; }
 
 @media (max-width: 720px) { .so-desk { display: none !important; } }
+
+.ded { color: var(--ok, #1a7f37); font-weight: 700; white-space: nowrap; }
+#toast .t-lin { display: block; margin-top: 4px; }
+
+.pgrid + .callout, .pgrid + .none-opt + .callout { margin-top: 18px; }
+
+.cta-espaco { display: block; height: 84px; }
+.cta-fixa { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgba(16,24,40,.08); }
+.cta-fixa .btn { width: 100%; justify-content: center; }
+@media (min-width: 721px) { .cta-fixa .btn { width: auto; min-width: 320px; } .cta-fixa { text-align: center; } }
+.pq-esc { display: flex; justify-content: space-between; max-width: 230px; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.acion-op.is-fixo .fixo-box { width: 22px; height: 22px; margin-top: 1px; flex: none; display: grid; place-items: center; background: var(--navy); border: 2px solid var(--navy); border-radius: 4px; color: #fff; box-sizing: border-box; }
+.acion-op.is-fixo .fixo-box .ic { width: 16px; height: 16px; stroke-width: 3; }
+
+.card.locais { padding: 16px; margin-top: 14px; }
+.loc-lista { display: grid; gap: 10px; margin-top: 10px; }
+.loc { display: grid; grid-template-columns: minmax(120px, 38%) 1fr; gap: 10px; align-items: center; }
+.loc > span { display: grid; line-height: 1.25; }
+.loc small { color: var(--muted); font-size: 12px; }
+.loc input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border-2); border-radius: var(--r-sm); font: inherit; font-size: 16px; background: #fff; }
+@media (max-width: 420px) { .loc { grid-template-columns: 1fr; gap: 4px; } }
+
+.done .done-act { margin: 12px 0; }
+.zap .mail-sec { margin: 8px auto 0; display: flex; width: fit-content; }
+
+.done .done-act { margin: 12px 0; }
+.zap .mail-sec { margin: 8px auto 0; display: flex; width: fit-content; }
+
+.bb-btn.btn.primary.incompleto, .bb-btn.btn.primary.incompleto:hover:not(:disabled) { background: #7f9fcf; color: #fff; outline: 2px dashed var(--navy); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  #app { position: fixed; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+}

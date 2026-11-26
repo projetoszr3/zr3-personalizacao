@@ -544,7 +544,7 @@
       avisoSem: { opcao: 'interruptor', texto: 'Atenção: sem o interruptor, o aplicativo e a voz ligam só o exaustor central. O exaustor da sua churrasqueira continua ligando pela luz interna dela, então acenda a luz sempre que usar a churrasqueira.' }
     },
     blocos: [
-      { titulo: 'Exaustor central x exaustor da churrasqueira', texto: 'São dois equipamentos: o exaustor central, na cobertura, atende todas as churrasqueiras do mesmo final de apartamento; o exaustor da sua churrasqueira fica na coifa e hoje liga junto com a luz interna dela. Os dois precisam estar ligados para a tiragem funcionar bem.' },
+      { titulo: 'Exaustores: central e da churrasqueira', texto: 'São dois equipamentos: o exaustor central, na cobertura, atende todas as churrasqueiras do mesmo final de apartamento; o exaustor da sua churrasqueira fica na coifa e hoje liga junto com a luz interna dela. Os dois precisam estar ligados para a tiragem funcionar bem.' },
       { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido pelo cliente'] }
     ]
   };
@@ -872,7 +872,7 @@
         { id: 'persianas', titulo: 'Persianas', curto: 'Persianas', icone: 'persiana', intro: 'Escolha, para cada ambiente, se deseja a persiana automatizada.', abas: 'sequencial', abasAmbientes: true, secoes: [PERSIANAS] },
         { id: 'vasos', titulo: 'Vasos sanitários', curto: 'Vasos', icone: 'vaso', intro: 'Escolha o modelo de cada banheiro da sua unidade.', video: { arquivo: 'assets/video/video-vasos.mp4', capa: 'assets/video/video-vasos.jpg', titulo: 'Vasos sanitários', inicio: 0 }, abas: 'sequencial', abaUnidade: 'banheiro', secoes: [VASO_SUITE, VASO_SOCIAL] },
         { id: 'acabamentos', titulo: 'Interruptores e acabamentos', curto: 'Acabamentos', icone: 'interruptor', intro: 'Escolha o modelo de espelho dos interruptores e tomadas.', secoes: [ESPELHOS] },
-        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Monte a automação conforme a sua rotina, do básico ao completo; os itens que dependem da preparação elétrica estão indicados em cada um.', videoSoIntro: true, video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
+        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Monte a automação conforme a sua rotina, do básico ao completo. Cada item mostra o que está incluído e o que é necessário para funcionar.', videoSoIntro: true, video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
 
           servicos: {
             titulo: 'O que está incluído em cada serviço de automação',
@@ -953,7 +953,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.3',
+    versao: '1.4',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',

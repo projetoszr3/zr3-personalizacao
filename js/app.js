@@ -261,8 +261,8 @@
     let linhas = '';
     if (d > 0) {
       linhas = alvo.avisoAcrescimo && pct && alvo.valor != null && d > alvo.valor + 0.004
-        ? `<span class="t-lin">${esc(alvo.aba || alvo.titulo)}: <strong>+ ${brl(alvo.valor)}</strong></span><span class="t-lin">Acréscimo de ${pct}% do Zigbee: <strong>+ ${brl(d - alvo.valor)}</strong></span>`
-        : `<span class="t-lin">Acréscimo no total: <strong>+ ${brl(d)}</strong></span>`;
+        ? `<span class="t-lin">${esc(alvo.aba || alvo.titulo)}: <strong>+&nbsp;${brl(alvo.valor)}</strong></span><span class="t-lin">Acréscimo de ${pct}% do Zigbee: <strong>+&nbsp;${brl(d - alvo.valor)}</strong></span>`
+        : `<span class="t-lin">Acréscimo no total: <strong>+&nbsp;${brl(d)}</strong></span>`;
     }
     toast(`${esc(texto)}${linhas}`, '', true);
   }
@@ -1188,19 +1188,19 @@
       if (sc.modo === 'obrigatorio') {
         res = `<div class="cond warn"><div class="cond-ic">${ic('alerta')}</div><div>
           <span class="badge b-warn">Aquisição obrigatória</span>
-          <h3>Fechamento de sacada: ${brl(sc.valor)}</h3>
-          <p>Unidades que realizaram a integração da sacada devem adquirir o fechamento, conforme as condições estabelecidas nos manuais de personalização. O valor entra no seu resumo ao confirmar que está ciente.</p></div></div>
+          <h3>Fechamento de sacada: ${brl(sc.valor)} <button type="button" class="help" data-act="sacada-info" aria-label="Integração x fechamento de sacada">${ic('info')}</button></h3>
+          <p>Unidades que realizaram a integração da sacada devem adquirir o fechamento, conforme as condições estabelecidas nos manuais de personalização.</p></div></div>
           ${ciente(`Estou ciente da obrigatoriedade e do valor de ${brl(sc.valor)} para o fechamento de sacada.`)}`;
       } else if (sc.modo === 'confirmar') {
         res = `<div class="cond info"><div class="cond-ic">${ic('info')}</div><div>
           <span class="badge b-warn">A confirmar pela ZR3</span>
-          <h3>Vamos verificar no seu cadastro</h3>
+          <h3>Vamos verificar no seu cadastro <button type="button" class="help" data-act="sacada-info" aria-label="Integração x fechamento de sacada">${ic('info')}</button></h3>
           <p>Se a integração da sacada for confirmada, o fechamento é obrigatório (${brl(sc.valor)}). Caso contrário, a equipe apresentará as opções para a sua unidade.</p></div></div>
           ${ciente('Estou ciente de que a ZR3 confirmará a condição da minha sacada e de que, havendo integração, o fechamento é obrigatório.')}`;
       } else if (sc.modo === 'opcional' || sc.modo === 'consulta') {
         const v = sc.modo === 'opcional' ? brl(sc.valor) : 'condição a definir pela ZR3';
         res = `<div class="q ${errDe(s.id + '-adquirir') ? 'has-error' : ''}">
-          <p class="q-t">Sem integração da sacada, o fechamento é <strong>opcional</strong> para o final ${f}. Deseja adquirir?</p>
+          <p class="q-t">Sem integração da sacada, o fechamento é <strong>opcional</strong> para o final ${f}. Deseja adquirir? <button type="button" class="help" data-act="sacada-info" aria-label="Integração x fechamento de sacada">${ic('info')}</button></p>
           <div class="choices c2">
             ${opcaoRadio('sacada-adq', 'data-v="sim"', es.adquirir === 'sim', sc.modo === 'opcional' ? 'Quero adquirir' : 'Tenho interesse', v)}
             ${opcaoRadio('sacada-adq', 'data-v="nao"', es.adquirir === 'nao', 'Não quero adquirir')}
@@ -1530,7 +1530,7 @@
     const errA = errDe(s.id + '-acion');
     return `<div class="acion">
       <h4>${esc(A.titulo)}</h4>
-      <div class="acion-ops">${A.padrao ? `<div class="check acion-op on is-fixo" role="checkbox" aria-checked="true" aria-disabled="true"><span class="fixo-box" aria-hidden="true">${ic('check')}</span><span><strong>${esc(A.padrao.rotulo || A.padrao)}</strong>${A.padrao.descricao ? `<small>${esc(A.padrao.descricao)}</small>` : ''}</span></div>` : ''}${ops}</div>
+      <div class="acion-ops">${A.padrao ? `<div class="check acion-op on is-fixo" role="checkbox" aria-checked="true" aria-disabled="true" data-act="acion-fixo"><span class="fixo-box" aria-hidden="true">${ic('check')}</span><span><strong>${esc(A.padrao.rotulo || A.padrao)}</strong>${A.padrao.descricao ? `<small>${esc(A.padrao.descricao)}</small>` : ''}</span></div>` : ''}${ops}</div>
       ${errA ? `<p class="field-error">${esc(errA.msg)}</p>` : ''}
       ${pecas}
       ${avisoSemVisto ? `<div class="callout warn acion-aviso" role="alert">${ic('alerta')}<p>${esc(A.avisoSem.texto)}</p></div>` : ''}
@@ -1753,19 +1753,16 @@
     const ct = e.contato || {};
     const msg = encodeURIComponent(msgWhats(e));
     const podeShare = podeCompartilhar();
-    const soShare = podeShare && celular();
     return `<div class="done">
       <div class="done-h">${ic('check')}<div><strong>PDF gerado com sucesso</strong><span>Protocolo ${esc(S.pdf.protocolo)} · ${new Date(S.pdf.em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></div></div>
-      <div class="done-act">
-        ${podeShare ? `<button type="button" class="btn primary" data-act="compartilhar">${ic('share')}<span>${soShare ? 'Salvar ou compartilhar o PDF' : 'Compartilhar o PDF'}</span></button>` : ''}
-        <button type="button" class="btn ghost" data-act="gerar">${ic('download')}<span>Gerar novamente</span></button>
-      </div>
       <div class="callout warn">${ic('alerta')}<p><strong>Falta um passo:</strong> envie o PDF à ${esc(ct.equipe || 'equipe de personalização')}. Sem o envio, a ZR3 não recebe as suas escolhas.</p></div>
-      ${ct.whatsapp ? `<div class="zap">
-        <a class="btn zap-btn block" target="_blank" rel="noopener" href="https://wa.me/${esc(E.soDigitos(ct.whatsapp))}?text=${msg}">${ic('msg')}<span>Enviar pelo WhatsApp da ZR3</span></a>
+      <div class="zap">
+        ${podeShare
+          ? `<button type="button" class="btn zap-btn block" data-act="compartilhar">${ic('msg')}<span>Salvar ou compartilhar o PDF com a ZR3</span></button>`
+          : ct.whatsapp ? `<a class="btn zap-btn block" target="_blank" rel="noopener" href="https://wa.me/${esc(E.soDigitos(ct.whatsapp))}?text=${msg}">${ic('msg')}<span>Enviar pelo WhatsApp da ZR3</span></a>` : ''}
         ${ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF)">${ic('mail')}<span>Prefiro enviar por e-mail</span></a>` : ''}
-        <p class="hint">${soShare ? 'Pelo <strong>Salvar ou compartilhar o PDF</strong>, escolha o WhatsApp e a conversa da ZR3: o arquivo vai junto com a mensagem.' : 'O botão abre a conversa da ZR3 com a mensagem pronta; anexe nela o PDF baixado.'}</p>
-      </div>` : ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}">${ic('mail')}<span>Enviar por e-mail</span></a>` : ''}
+        <p class="hint">${podeShare ? 'Escolha o WhatsApp e a conversa da ZR3: o PDF vai junto com a mensagem.' : 'O PDF foi baixado: anexe-o na conversa com a mensagem pronta.'}</p>
+      </div>
       <div class="proximos"><h3>Depois do envio</h3>
         <ol>
           <li>A equipe de personalização confere as suas escolhas e prepara o orçamento definitivo e o projeto atualizado.</li>
@@ -1994,6 +1991,7 @@
       }
       case 'video': abrirVideo(+t.dataset.v); break;
       case 'video-replay': { const v = $modal.querySelector('.vid-modal video'); if (v) { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); } break; }
+      case 'acion-fixo': toast('O aplicativo no celular está sempre incluído na automação do exaustor e não pode ser desmarcado.'); break;
       case 'aux-ok': {
         const sid = t.dataset.s; fecharModal(); aplicarAux(emp(), sid);
         limparErro(sid); limparErro(sid + '-aux'); salvar(); render(); break;
@@ -2414,8 +2412,8 @@
       const soShare = podeCompartilhar() && celular();
       if (!soShare) baixar(res);
       render();
-      const d = document.getElementById('pos-pdf'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      toast(soShare ? 'PDF pronto. Toque em “Salvar ou compartilhar o PDF” e envie à equipe de personalização.' : 'PDF gerado. Agora envie à equipe de personalização.');
+      const g = document.querySelector('[data-act="gerar"]'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      toast(soShare ? 'PDF pronto. Toque em “Salvar ou compartilhar o PDF com a ZR3”.' : 'PDF gerado. Agora envie à equipe de personalização.');
     } catch (err) {
       console.error(err);
       toast('Não foi possível gerar o PDF. Tente novamente.', 'erro');

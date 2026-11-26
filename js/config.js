@@ -289,7 +289,7 @@
     descricao: 'Instalada na porta de entrada da unidade. O valor inclui a instalação, configuração, conexão à rede, cadastro de usuários, digitais, tags e senhas.',
     obrigatoria: true,
     cobranca: 'por unidade',
-    nenhuma: { rotulo: 'Fechadura comum (padrão)', descricao: 'Padrão de entrega: a porta de entrada recebe a fechadura comum, sem custo.', noTopo: true },
+    nenhuma: { rotulo: 'Fechadura comum (padrão)', descricao: 'Padrão de entrega: a porta de entrada recebe a fechadura comum, sem custo.' },
     opcoes: [
       {
         id: 'fechadura-smart-wifi', cheki: '4.9.5',
@@ -510,7 +510,7 @@
     titulo: 'Automação do exaustor central da churrasqueira',
     resumoCurto: 'Aciona o exaustor central pelo aplicativo, por voz ou por interruptor.', inclui: ['produto', 'instalacao', 'configuracao'],
     nome: 'Acionamento automatizado do exaustor central',
-    descricao: 'O exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ficar ligado sempre que você usar a churrasqueira, para a fumaça não voltar para os apartamentos. O comando dele fica na caixa de comando no pavimento da cobertura; com a automação, você liga de dentro da sua unidade.',
+    descricao: 'O exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ficar ligado sempre que você usar a churrasqueira, para a fumaça não voltar para os apartamentos. A operação dele fica na caixa de comando no pavimento da cobertura; com a automação, você liga de dentro da sua unidade.',
     avisoNao: { titulo: 'Tem certeza?', texto: 'Sem a automação, para usar a churrasqueira você vai precisar subir até a cobertura para ligar o exaustor central. Sem ele ligado, a fumaça pode voltar para dentro dos apartamentos.' },
     imagem: 'assets/img/exaustor-app.jpg',
     valor: 75,
@@ -526,7 +526,7 @@
         { id: 'voz', rotulo: 'Voz', descricao: 'Exige a programação da assistente de voz, que já fica marcada na aba dela.',
           marca: { secao: 'alexa', resposta: 'sim', mensagem: 'Para acionar o exaustor por voz, é necessária a programação da assistente de voz.', acao: 'Mantenha a programação ou mude a forma de acionamento na aba Exaustor.' } },
         { id: 'interruptor', rotulo: 'Interruptor na churrasqueira', descricao: 'O interruptor ao lado da churrasqueira é trocado por um inteligente, na linha e na cor escolhidas, com uma tecla para os exaustores.',
-          destaque: 'Vantagem: uma tecla só liga os dois exaustores juntos, o central e o da sua churrasqueira.' }
+          destaque: 'Vantagem: apenas uma tecla liga os dois exaustores juntos, o central e o da sua churrasqueira.' }
       ],
       pecas: {
         titulo: 'Qual é o interruptor da churrasqueira?',
@@ -545,8 +545,7 @@
     },
     blocos: [
       { titulo: 'Exaustor central x exaustor da churrasqueira', texto: 'São dois equipamentos: o exaustor central, na cobertura, atende todas as churrasqueiras do mesmo final de apartamento; o exaustor da sua churrasqueira fica na coifa e hoje liga junto com a luz interna dela. Os dois precisam estar ligados para a tiragem funcionar bem.' },
-      { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido pelo cliente'] },
-      { titulo: 'Boas práticas', itens: ['Ligue o exaustor alguns minutos antes de acender a churrasqueira', 'Mantenha ligado até a brasa apagar totalmente', 'Programar o desligamento pelo aplicativo evita esquecer o exaustor ligado'] }
+      { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido pelo cliente'] }
     ]
   };
 
@@ -567,7 +566,7 @@
     blocos: [
       { titulo: 'O que está incluído', itens: ['Integração dos dispositivos automatizados da unidade à assistente de voz', 'Criação de cenas e rotinas (ex.: “boa noite” apaga as luzes e fecha as persianas)', 'Comandos de voz para luzes, tomadas e persianas automatizadas'] },
       { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz, o qual deve ser adquirido pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta no aplicativo da assistente de voz, no celular'] },
-      { titulo: 'Limites da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
+      { titulo: 'Limites e funcionamento da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
     ]
   };
 
@@ -670,7 +669,7 @@
     id: 'persianas',
     video: { arquivo: 'assets/video/video-persianas.mp4', capa: 'assets/video/video-persianas.jpg', titulo: 'Persianas motorizadas', inicio: 0 },
     titulo: 'Persiana automatizada integrada à janela',
-    descricao: 'As janelas dos dormitórios são entregues com a caixa para persiana. Como opcional, a construtora oferece a persiana motorizada, que abre e fecha pelo interruptor, pelo aplicativo ou por voz. Ela é adquirida junto com um interruptor inteligente, pago à parte: o mínimo é a tecla Touch - Vidro (Wi-Fi).',
+    descricao: 'As janelas dos dormitórios são entregues com a caixa para persiana. Como opcional, a construtora oferece a persiana motorizada, que abre e fecha pelo interruptor, pelo aplicativo ou por voz. Ela é adquirida junto com um interruptor inteligente, pago à parte: a tecla mais básica é a Touch - Vidro (Wi-Fi).',
 
     aviso: 'A persiana é instalada sempre com a tecla automatizada (interruptor inteligente). A construtora não trabalha com o acionador comum de persiana.',
     linhas: LINHAS_PERSIANA,
@@ -695,7 +694,7 @@
         galeria: [
           { src: 'assets/img/persiana-integrada.jpg', legenda: 'Persiana motorizada instalada na caixa da esquadria. Imagem ilustrativa.' },
           { src: 'assets/img/persiana-caixa.jpg', legenda: 'Caixa para persiana integrada à esquadria, entregue pela construtora na janela dos dormitórios (padrão de entrega). A persiana motorizada é instalada dentro dessa caixa. Imagem ilustrativa.' },
-          { src: 'assets/img/jw-touch-branco-persiana.jpg', legenda: 'Interruptor de persiana da linha Touch - Vidro (JWCom), o padrão mínimo: adquirido junto com a persiana e pago à parte. Nas demais linhas, a persiana usa o interruptor de 3 teclas da linha escolhida. Abre e fecha a persiana pelo interruptor, pelo aplicativo ou por comando de voz.' },
+          { src: 'assets/img/jw-touch-branco-persiana.jpg', legenda: 'Interruptor de persiana da linha Touch - Vidro (JWCom), a tecla mais básica: adquirido junto com a persiana e pago à parte. Nas demais linhas, a persiana usa o interruptor de 3 teclas da linha escolhida. Abre e fecha a persiana pelo interruptor, pelo aplicativo ou por comando de voz.' },
         ],
         resumo: 'Persiana motorizada instalada na caixa da esquadria. Abre e fecha pelo interruptor inteligente (pago à parte), pelo aplicativo ou por voz.',
         specs: [
@@ -758,7 +757,7 @@
     titulo: 'Integração da sacada',
     pergunta: 'Na 1ª etapa de personalização, você fez a integração da sacada ao living?',
     info: [
-      'Integração da sacada: retirada da esquadria entre a sacada e o living, feita na 1ª etapa por alguns clientes.',
+      'Integração da sacada: retirada da esquadria entre a sacada e o living.',
       'Com a integração, o fechamento da sacada é obrigatório; sem ela, o fechamento é opcional.',
       'Se não lembrar, consulte o seu termo da 1ª etapa ou marque “Não tenho certeza”: a ZR3 confirma no cadastro.'
     ]
@@ -780,7 +779,7 @@
 
   const GLOSSARIO = {
     final: { titulo: 'Final da unidade', texto: 'Posição do apartamento na torre (ex.: 501 → final 01). É identificado automaticamente pelo cadastro do empreendimento e define os itens disponíveis e as regras desta etapa.' },
-    integracao: { titulo: 'Integração da sacada', texto: 'Na 1ª etapa de personalização, alguns clientes optaram por integrar a sacada ao living (retirando a esquadria entre os ambientes). Para essas unidades, o fechamento da sacada é obrigatório. Se não lembrar, consulte o seu termo da 1ª etapa.' },
+    integracao: { titulo: 'Integração da sacada', texto: 'Retirada da esquadria entre a sacada e o living, feita na 1ª etapa de personalização. Para essas unidades, o fechamento da sacada é obrigatório. Se não lembrar, consulte o seu termo da 1ª etapa.' },
     espelho: { titulo: 'Espelho', texto: 'É a placa de acabamento que fica sobre os interruptores e tomadas. Trocar o modelo muda o visual de todos os pontos elétricos do apartamento.' },
     neutro: { titulo: 'Condutor neutro', texto: 'É o fio que fecha o circuito elétrico junto com a fase. Interruptores inteligentes precisam dele na caixa para ficarem sempre energizados e conectados à rede.' },
     zigbee: { titulo: 'Zigbee', texto: 'Protocolo sem fio de baixo consumo, próprio para automação. Os dispositivos se conectam a um hub em vez de ao roteador, o que melhora a estabilidade em casas com muitas automações.' },
@@ -854,7 +853,7 @@
         titulo: 'Wi-Fi ou Zigbee: os dois protocolos',
         texto: 'Cada linha de interruptor se comunica por um destes dois protocolos sem fio. A tag de cada linha mostra qual é.',
 
-        resumoCurto: 'Cada linha de interruptor usa Wi-Fi (conecta direto ao roteador, sem hub) ou Zigbee (conecta a um hub, mais estável com muitos dispositivos, com acréscimo de {pct}%). A tag de cada linha mostra qual é. Toque no (i) para ver o comparativo completo.',
+        resumoCurto: 'Cada linha de interruptor usa Wi-Fi (direto no roteador) ou Zigbee (por um hub, com acréscimo de {pct}%).',
         itens: [
           { id: 'wifi', nome: 'Wi-Fi', resumo: 'Cada dispositivo se conecta direto ao roteador da unidade.',
             pros: ['Não precisa de hub.', 'Sem acréscimo de valor, desde que nenhum item escolhido seja Zigbee.'],
@@ -873,7 +872,7 @@
         { id: 'persianas', titulo: 'Persianas', curto: 'Persianas', icone: 'persiana', intro: 'Escolha, para cada ambiente, se deseja a persiana automatizada.', abas: 'sequencial', abasAmbientes: true, secoes: [PERSIANAS] },
         { id: 'vasos', titulo: 'Vasos sanitários', curto: 'Vasos', icone: 'vaso', intro: 'Escolha o modelo de cada banheiro da sua unidade.', video: { arquivo: 'assets/video/video-vasos.mp4', capa: 'assets/video/video-vasos.jpg', titulo: 'Vasos sanitários', inicio: 0 }, abas: 'sequencial', abaUnidade: 'banheiro', secoes: [VASO_SUITE, VASO_SOCIAL] },
         { id: 'acabamentos', titulo: 'Interruptores e acabamentos', curto: 'Acabamentos', icone: 'interruptor', intro: 'Escolha o modelo de espelho dos interruptores e tomadas.', secoes: [ESPELHOS] },
-        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Cada item é independente: monte a automação conforme a sua rotina, do básico ao completo.', video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
+        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Monte a automação conforme a sua rotina, do básico ao completo; os itens que dependem da preparação elétrica estão indicados em cada um.', videoSoIntro: true, video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
 
           servicos: {
             titulo: 'O que está incluído em cada serviço de automação',
@@ -954,7 +953,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.2',
+    versao: '1.3',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',
@@ -991,11 +990,12 @@
       titulo: 'Pesquisa de satisfação',
       texto: 'Opcional. Leva poucos segundos e nos ajuda a melhorar as próximas etapas.',
       perguntas: [
-        { id: 'geral', texto: 'De modo geral, como você avalia esta plataforma de personalização?' },
-        { id: 'etapa1', texto: 'Em comparação com a 1ª etapa de personalização, como você avalia esta etapa?' },
-        { id: 'etapa2', texto: 'Em comparação com a 2ª etapa de personalização, como você avalia esta etapa?' }
+        { id: 'geral', texto: 'De modo geral, como você avalia o funcionamento desta plataforma de personalização?' },
+
+        { id: 'etapa1', texto: 'Comparado à 1ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'] },
+        { id: 'etapa2', texto: 'Comparado à 2ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'] }
       ],
-      rotulos: ['Muito ruim', 'Ruim', 'Regular', 'Boa', 'Muito boa']
+      rotulos: ['Muito ruim', 'Ruim', 'Regular', 'Bom', 'Muito bom']
     },
     glossario: GLOSSARIO,
     empreendimentos: EMPREENDIMENTOS

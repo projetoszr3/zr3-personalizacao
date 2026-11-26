@@ -140,11 +140,11 @@
     render();
     if (erros.length) {
       const first = document.querySelector('.has-error, .field-error');
-      if (first) first.scrollIntoView({ block: 'center' }); else window.scrollTo({ top: 0 });
+      if (first) first.scrollIntoView({ block: 'center' }); else rolarPara(0);
       toast(`Falta concluir: ${erros[0].msg}`, 'erro');
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    rolarPara(0);
     const h = document.querySelector('#conteudo h1');
     if (h) h.focus({ preventScroll: true });
   }
@@ -156,6 +156,19 @@
     if (comErro) S.abas[et.id] = (abaDaSecao(et, comErro.id) || comErro).id;
     if (sequencial(et)) { const tErr = tabsSeq(et).find((t) => erros.some((x) => t.contem(x.campo))); if (tErr) S.abas[et.id] = tErr.id; }
   }
+
+  function faltaNaTela() {
+    try {
+      if (S.tela === 'inicio' || S.tela === 'resumo') return false;
+      const etS = etapaAtual();
+      if (etS && sequencial(etS)) {
+        const lista = tabsSeq(etS), atual = abaSeqAtiva(etS), k = lista.findIndex((t) => t.id === atual.id);
+        if (k < lista.length - 1) return validarAbaSeq(emp(), atual).length > 0;
+      }
+      return E.validarTela(S, CFG, emp(), S.tela).length > 0;
+    } catch (err) { return false; }
+  }
+  function atualizarAvancar() { const b = document.querySelector('.bottombar [data-act="avancar"]'); if (b) b.classList.toggle('incompleto', faltaNaTela()); }
   function avancar() {
     const ts = telas();
     const i = ts.indexOf(S.tela);
@@ -245,10 +258,19 @@
     marcarAuto(alvo, resposta);
     let d = 0; try { if (antes != null) d = Math.round((E.calcular(S, e).total - antes) * 100) / 100; } catch (err) {   }
     const pct = (((e.regras && e.regras.acrescimos) || []).find((x) => x.id === 'zigbee') || {}).percentual;
-    const comp = alvo.avisoAcrescimo && pct && alvo.valor != null && d > alvo.valor ? ` (${brl(alvo.valor)} do item + ${brl(d - alvo.valor)} do acréscimo de ${pct}% do Zigbee)` : '';
-    toast(`${esc(texto)}${d > 0 ? ` Acréscimo no total: <strong>+ ${brl(d)}</strong>${esc(comp)}.` : ''}`, '', true);
+    let linhas = '';
+    if (d > 0) {
+      linhas = alvo.avisoAcrescimo && pct && alvo.valor != null && d > alvo.valor + 0.004
+        ? `<span class="t-lin">${esc(alvo.aba || alvo.titulo)}: <strong>+ ${brl(alvo.valor)}</strong></span><span class="t-lin">Acréscimo de ${pct}% do Zigbee: <strong>+ ${brl(d - alvo.valor)}</strong></span>`
+        : `<span class="t-lin">Acréscimo no total: <strong>+ ${brl(d)}</strong></span>`;
+    }
+    toast(`${esc(texto)}${linhas}`, '', true);
   }
   let modalVoltaFoco = null;
+
+  const rolador = () => { const a = document.getElementById('app'); return a && getComputedStyle(a).overflowY === 'auto' ? a : null; };
+  const posRolagem = () => { const r = rolador(); return r ? r.scrollTop : window.scrollY; };
+  function rolarPara(top, behavior) { const r = rolador(); const o = { top, behavior: behavior || 'auto' }; if (r) r.scrollTo(o); else window.scrollTo(o); }
   function abrirModal(html, { titulo = '', largo = false } = {}) {
     modalVoltaFoco = document.activeElement;
     $modal.innerHTML = `<div class="overlay" data-act="fechar-modal"></div>
@@ -340,14 +362,14 @@
     else if (tela === 'resumo') corpo = telaResumo(e);
     else corpo = telaEtapa(e, etapaAtual());
 
-    const scroll = window.scrollY;
+    const scroll = posRolagem();
     const foco = chaveFoco(document.activeElement);
     $app.innerHTML = `
       ${cabecalho(e)}
       ${tela !== 'inicio' ? progresso(e) : ''}
       <main id="conteudo" class="wrap ${tela === 'inicio' ? 'inicio' : ''}" tabindex="-1">${corpo}</main>
       ${tela !== 'inicio' ? barraInferior(e) : ''}`;
-    window.scrollTo(0, scroll);
+    rolarPara(scroll);
 
     const faixa = document.querySelector('.tabs.seq'), cur = faixa && faixa.querySelector('.tab.cur');
     if (cur) faixa.scrollLeft = Math.max(0, cur.offsetLeft - faixa.offsetLeft - (faixa.clientWidth - cur.offsetWidth) / 2);
@@ -417,7 +439,7 @@
     return `<div class="bottombar"><div class="wrap bottombar-in">
       <button type="button" class="btn ghost bb-btn" data-act="voltar" aria-label="Voltar" ${i <= 0 ? 'disabled' : ''}>${ic('left')}<span class="bb-tx">Voltar</span></button>
       <div class="tot" aria-live="polite">${totalTxt}</div>
-      ${ultimo ? '<span class="btn-spacer"></span>' : `<button type="button" class="btn primary bb-btn" data-act="avancar" aria-label="${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}"><span class="bb-tx">${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}</span>${ic('right')}</button>`}
+      ${ultimo ? '<span class="btn-spacer"></span>' : `<button type="button" class="btn primary bb-btn ${faltaNaTela() ? 'incompleto' : ''}" data-act="avancar" aria-label="${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}"><span class="bb-tx">${ts[i + 1] === 'resumo' ? 'Revisar' : 'Continuar'}</span>${ic('right')}</button>`}
     </div></div>`;
   }
 
@@ -427,7 +449,7 @@
       ? `<div class="resume card">
           <div class="resume-tx"><strong>Você tem uma personalização em andamento</strong>
           <span>${S.cliente.nome ? esc(S.cliente.nome) + ' · ' : ''}${S.cliente.unidade ? 'Unidade ' + esc(S.cliente.unidade) + ' · ' : ''}salva neste dispositivo${S.atualizadoEm ? ' em ' + new Date(S.atualizadoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : ''}.</span></div>
-          <div class="resume-act"><button type="button" class="btn primary so-desk" data-act="retomar">Continuar de onde parei ${ic('right')}</button>
+          <div class="resume-act">
           <button type="button" class="btn ghost" data-act="recomecar">${ic('reset')}<span>Começar do zero</span></button></div>
         </div>`
       : '';
@@ -453,7 +475,7 @@
         <p class="lead">${esc(CFG.textos.boasVindasTexto)}</p>
         ${e.prazo ? `<p class="prazo">Prazo para envio: <strong>${esc(e.prazo)}</strong></p>` : ''}
         <div class="hero-act">
-          <button type="button" class="btn primary lg" data-act="iniciar">${temProgresso() ? 'Ir para a personalização' : 'Iniciar personalização'} ${ic('right')}</button>
+
           <button type="button" class="btn light lg" data-act="prazos">${ic('relogio')}<span>Ver prazos por pavimento</span></button>
           ${e.manualUrl ? `<a class="btn light lg" href="${esc(e.manualUrl)}" target="_blank" rel="noopener">${ic('book')}<span>Consultar manual completo</span></a>` : ''}
         </div>
@@ -707,7 +729,7 @@
       <h1 tabindex="-1">${esc(et.titulo)}</h1>
       ${et.intro ? `<p>${esc(et.intro)}</p>` : ''}
     </div>
-    ${et.video && !captura ? `<div class="vid-bar">${videoBtn(et.video)}</div>` : ''}
+    ${et.video && !captura && (!et.videoSoIntro || primeiraAba(et)) ? `<div class="vid-bar">${videoBtn(et.video)}</div>` : ''}
     ${et.imagem && primeiraAba(et) ? `<div class="banner">${img(et.imagem, et.titulo)}</div>` : ''}
     ${et.servicos && primeiraAba(et) && !et.secoes.some((x) => x.tipo === 'explicacao') ? servicosHtml(et.servicos, !sequencial(et) || !concluida(et, tabsSeq(et)[0].id)) : ''}
     ${et.passos && primeiraAba(et) ? `<details class="card passos"><summary>${ic('lista')} ${esc(et.passos.titulo)}</summary>${et.passos.texto ? `<p>${esc(et.passos.texto)}</p>` : ''}<ol>${et.passos.itens.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : ''}
@@ -836,6 +858,13 @@
     const ln = grupo ? grupo.ln : pa ? pa.ln : s._linha;
     const es = grupo ? grupo.raw : (S.escolhas[lid] || (lid !== L.id ? S.escolhas[L.id] : null) || {});
     const dg = grupo ? ` data-s="${s.id}" data-g="${gi}"` : '';
+
+    const bDed = (() => {
+      if (s.tipo !== 'persianas' || !ambId || !E.persianaBrinde(S, e, s.id, ambId)) return null;
+      const bI = E.brindeInterruptor(S, e, s, ambId); if (!bI || bI.cobranca === 'integral') return null;
+      const bl = (L.opcoes || []).find((x) => x.id === bI.linha); const v = bl && (bl.precos || {})[s.pecaLinha || 'persiana'];
+      return v == null ? null : v;
+    })();
     if (grupo && ln && ln.completa && !gruposAbertos.has(`${s.id}-${gi}`)) {
       return `<div class="linha-res" id="linha-${s.id}-g${gi}">${img(E.imgLinha(ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>Linha e cor ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong><span>${esc(ln.linha.subtitulo || '')}</span></div><button type="button" class="btn ghost sm" data-act="linha-trocar"${dg}>Trocar</button></div>`;
     }
@@ -853,7 +882,7 @@
       const sel = es.linha === o.id, min = minPreco(o);
 
       const precoCard = (op, mn) => {
-        if (s.pecaLinha) { const v = (op.precos || {})[s.pecaLinha]; return v == null ? '<span class="price consult">Valor sob consulta</span>' : `<span class="price">+ ${brl(v)} <small>por ambiente</small></span>`; }
+        if (s.pecaLinha) { const v = (op.precos || {})[s.pecaLinha]; return v == null ? '<span class="price consult">Valor sob consulta</span>' : bDed != null ? `<span class="price">${brl(v)} <span class="ded">− ${brl(Math.min(v, bDed))}</span> <small>brinde</small></span>` : `<span class="price">+ ${brl(v)} <small>por ambiente</small></span>`; }
         return mn == null ? '<span class="price consult">Valores sob consulta</span>' : `<span class="price">a partir de ${brl(mn)}</span>`;
       };
       const cs = tom ? E.coresNoTom(L, o, tom) : [];
@@ -924,7 +953,7 @@
     abaAnimar = mudou; render(); abaAnimar = false;
     if (rolar) {
       const tabs = document.querySelector('.sub-prog') || document.querySelector('.tabs');
-      if (tabs) window.scrollTo({ top: Math.max(0, tabs.getBoundingClientRect().top + window.scrollY - 140), behavior: 'smooth' });
+      if (tabs) rolarPara(Math.max(0, tabs.getBoundingClientRect().top + posRolagem() - 140), 'smooth');
     }
   }
   let abaAnimar = false;
@@ -1153,14 +1182,14 @@
       const pergunta = sc.fonte === 'cadastro'
         ? `<div class="callout info">${ic('info')}<p>Consta no cadastro da ZR3 que a unidade ${esc(S.cliente.unidade)} realizou a <strong>integração da sacada</strong> na 1ª etapa.</p></div>`
         : resp
-          ? `<div class="callout info">${ic('info')}<p>Em Etapas anteriores, você informou que <strong>${resp}</strong> na 1ª etapa.</p><button type="button" class="btn ghost sm" data-act="goto" data-tela="anteriores">Alterar resposta</button></div>`
+          ? ''
           : `<div class="callout warn">${ic('alerta')}<p>Responda, em Etapas anteriores, se a sua unidade fez a integração da sacada.</p><button type="button" class="btn ghost sm" data-act="goto" data-tela="anteriores">Ir para Etapas anteriores</button></div>`;
       let res = '';
       if (sc.modo === 'obrigatorio') {
         res = `<div class="cond warn"><div class="cond-ic">${ic('alerta')}</div><div>
           <span class="badge b-warn">Aquisição obrigatória</span>
           <h3>Fechamento de sacada: ${brl(sc.valor)}</h3>
-          <p>Unidades que realizaram a integração da sacada devem adquirir o fechamento, conforme as condições estabelecidas nos manuais de personalização. O item foi <strong>incluído automaticamente</strong> no seu resumo.</p></div></div>
+          <p>Unidades que realizaram a integração da sacada devem adquirir o fechamento, conforme as condições estabelecidas nos manuais de personalização. O valor entra no seu resumo ao confirmar que está ciente.</p></div></div>
           ${ciente(`Estou ciente da obrigatoriedade e do valor de ${brl(sc.valor)} para o fechamento de sacada.`)}`;
       } else if (sc.modo === 'confirmar') {
         res = `<div class="cond info"><div class="cond-ic">${ic('info')}</div><div>
@@ -1336,8 +1365,7 @@
     const blocos = gs.map((g) => {
       const ok = g.ln && g.ln.completa;
       const pecas = aux ? '' : ok
-        ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(g.ln))}</h4><ul class="qlist card qcompacta">${linhasQtd(e, s, g.itens, g.raw.qtd || {}, false, g.i)}</ul>
-           <label class="g-obs"><span>Local ou circuito <small>(opcional)</small></span><input type="text" maxlength="160" data-gobs="${g.i}" data-s="${s.id}" value="${esc(g.raw.obs || '')}" placeholder="Ex.: luzes do living e da sacada"></label>`
+        ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(g.ln))}</h4><ul class="qlist card qcompacta">${linhasQtd(e, s, g.itens, g.raw.qtd || {}, false, g.i)}</ul>`
         : `<p class="note">${ic('info')} Escolha a cor e a linha para ver as peças e os valores.</p>`;
       return `<div class="lgrupo ${multi ? 'multi' : ''}">
         ${multi ? `<div class="lg-head"><strong>${aux ? 'Preferência' : 'Linha'} ${g.i + 1}${g.ln ? ' · ' + esc(E.nomeLinha(g.ln)) : ''}</strong><button type="button" class="btn ghost sm" data-act="grupo-del" data-s="${s.id}" data-g="${g.i}">${ic('x')}<span>Remover</span></button></div>` : ''}
@@ -1350,7 +1378,26 @@
     return `<div class="card linha-box lb-intro"><h4 class="lb-t">${aux ? 'Linha de preferência dos interruptores' : esc(s.linhas.titulo)}</h4><p class="muted">${aux ? 'Escolha a cor e a linha que você prefere. A equipe da ZR3 faz a contagem das peças e informa os valores na revisão do orçamento.' : esc(s.linhas.descricao)}</p></div>
       ${blocos}
       <button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}" ${podeAdd ? '' : 'disabled'}>${ic('mais')}<span>${aux ? 'Adicionar outra linha de preferência' : 'Adicionar outra linha'}</span></button>
-      ${podeAdd ? '' : `<p class="muted add-linha-dica">${aux ? 'Escolha a cor e a linha desta preferência para adicionar outra.' : 'Para mesclar linhas, escolha as peças desta linha e depois adicione outra.'}</p>`}`;
+      ${podeAdd ? '' : `<p class="muted add-linha-dica">${aux ? 'Escolha a cor e a linha desta preferência para adicionar outra.' : 'Para mesclar linhas, escolha as peças desta linha e depois adicione outra.'}</p>`}
+      ${aux ? '' : locaisHtml(s)}`;
+  }
+
+  function locaisHtml(s) {
+    const es = S.escolhas[s.id] || {}, loc = es.locais || {};
+    const pecas = [];
+    (s._grupos || []).forEach((g) => {
+      if (!g.ln || !g.ln.completa) return;
+      g.itens.filter(E.ativo).forEach((it) => {
+        const n = (g.raw.qtd || {})[it.id] || 0;
+        const curto = ((s.linhas && s.linhas.pecasCurtas) || {})[it.id] || it.nome;
+        for (let k = 1; k <= n; k++) pecas.push({ chave: E.chaveLocal(g.raw, it.id, k), rot: `${curto}${n > 1 ? ` (${k} de ${n})` : ''}`, linha: E.nomeLinha(g.ln) });
+      });
+    });
+    if (!pecas.length) return '';
+    const variasLinhas = new Set(pecas.map((p) => p.linha)).size > 1;
+    return `<div class="card locais"><h4 class="lb-t">Onde fica cada peça? <small class="muted">(opcional)</small></h4>
+      <p class="muted">Indique o ambiente ou o circuito de cada interruptor ou tomada. Ajuda a equipe na instalação.</p>
+      <div class="loc-lista">${pecas.map((p) => `<label class="loc"><span><strong>${esc(p.rot)}</strong>${variasLinhas ? `<small>${esc(p.linha)}</small>` : ''}</span><input type="text" maxlength="80" data-loc="${esc(p.chave)}" data-s="${s.id}" value="${esc(loc[p.chave] || '')}" placeholder="Ex.: living, luz da sanca"></label>`).join('')}</div></div>`;
   }
 
   function secQuantidades(e, s) {
@@ -1508,7 +1555,8 @@
     const ehPadrao = !!(bInt && pa.ln && pa.ln.linha.id === bInt.linha);
     const pPadrao = bLinha ? (bLinha.precos || {})[s.pecaLinha || 'persiana'] : null;
     const dif = bInt && !ehPadrao && vi != null && pPadrao != null ? (bInt.cobranca === 'integral' ? vi : Math.max(0, vi - pPadrao)) : null;
-    const infoLinha = bInt ? (ehPadrao ? '<span>Interruptor padrão do brinde: sem custo</span>' : `<span>${dif == null ? 'Linha diferente da padrão do brinde: valor adicional a confirmar' : `Linha diferente da padrão do brinde: + ${brl(dif)} (diferença)`}</span>`) : null;
+
+    const infoLinha = bInt ? (vi == null ? '<span>Valor do interruptor a confirmar</span>' : bInt.cobranca === 'integral' || pPadrao == null ? `<span>Interruptor: ${brl(vi)}</span>` : `<span>Interruptor: ${brl(vi)} <span class="ded">− ${brl(Math.min(vi, pPadrao))}</span> <small class="muted">brinde</small></span>`) : null;
     const temErro = errDe(s.id + '-' + a.id);
 
     const ia = (s.ambientes || []).findIndex((x) => x.id === a.id), ant = ia > 0 ? s.ambientes[ia - 1] : null;
@@ -1681,12 +1729,19 @@
     </section>`;
   }
 
+  function aplicarAux(e, sid) {
+    const es = E.esc(S, sid); es.auxilio = true; es.nenhum = false;
+    const s = E.secao(e, sid);
+    if (s && s.linhasMultiplas) { gruposEdit(s).forEach((g) => { g.qtd = {}; }); sincronizarQtd(s); } else es.qtd = {};
+    es.locais = {};
+    toast('Com o auxílio, a equipe da ZR3 faz a contagem das peças. Escolha só a linha de preferência.');
+  }
   function pesquisaHtml() {
     const P = CFG.pesquisa; if (!P || !(P.perguntas || []).length || captura) return '';
     const r = S.pesquisa || {};
     return `<section class="card rgroup pesquisa"><div class="rgroup-h"><h2>${ic('star')} ${esc(P.titulo)}</h2></div>${P.texto ? `<p class="muted">${esc(P.texto)}</p>` : ''}
-      ${P.perguntas.map((q) => { const v = r[q.id] || 0; return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="stars" role="radiogroup" aria-label="${esc(q.texto)}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} de 5: ${esc((P.rotulos || [])[n - 1] || '')}" data-act="pesquisa" data-q="${q.id}" data-n="${n}">${ic('star')}</button>`).join('')}<span class="pq-r">${v ? esc((P.rotulos || [])[v - 1] || '') : ''}</span></div></div>`; }).join('')}
-      <p class="hint">${ic('info')} As respostas não aparecem no PDF.</p></section>`;
+      ${P.perguntas.map((q) => { const v = r[q.id] || 0, rot = q.rotulos || P.rotulos || []; return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="stars" role="radiogroup" aria-label="${esc(q.texto)}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} de 5: ${esc(rot[n - 1] || '')}" data-act="pesquisa" data-q="${q.id}" data-n="${n}">${ic('star')}</button>`).join('')}<span class="pq-r">${v ? esc(rot[v - 1] || '') : ''}</span></div><div class="pq-esc"><span>${esc(rot[0] || '')}</span><span>${esc(rot[4] || '')}</span></div></div>`; }).join('')}
+      </section>`;
   }
   function msgWhats(e) {
     const m = (e.contato || {}).mensagemWhats || 'Olá! Sou {nome}, unidade {unidade} do {empreendimento}. Segue o PDF da minha personalização da 3ª etapa (protocolo {protocolo}).';
@@ -1701,17 +1756,16 @@
     const soShare = podeShare && celular();
     return `<div class="done">
       <div class="done-h">${ic('check')}<div><strong>PDF gerado com sucesso</strong><span>Protocolo ${esc(S.pdf.protocolo)} · ${new Date(S.pdf.em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></div></div>
-      <div class="callout warn">${ic('alerta')}<p><strong>Falta um passo:</strong> envie este PDF à ${esc(ct.equipe || 'equipe de personalização')} por WhatsApp ou e-mail. Sem o envio, a ZR3 não recebe as suas escolhas.</p></div>
+      <div class="done-act">
+        ${podeShare ? `<button type="button" class="btn primary" data-act="compartilhar">${ic('share')}<span>${soShare ? 'Salvar ou compartilhar o PDF' : 'Compartilhar o PDF'}</span></button>` : ''}
+        <button type="button" class="btn ghost" data-act="gerar">${ic('download')}<span>Gerar novamente</span></button>
+      </div>
+      <div class="callout warn">${ic('alerta')}<p><strong>Falta um passo:</strong> envie o PDF à ${esc(ct.equipe || 'equipe de personalização')}. Sem o envio, a ZR3 não recebe as suas escolhas.</p></div>
       ${ct.whatsapp ? `<div class="zap">
         <a class="btn zap-btn block" target="_blank" rel="noopener" href="https://wa.me/${esc(E.soDigitos(ct.whatsapp))}?text=${msg}">${ic('msg')}<span>Enviar pelo WhatsApp da ZR3</span></a>
-        <ol class="zap-passos"><li>${soShare ? 'Toque em <strong>Salvar ou compartilhar o PDF</strong> (abaixo) e escolha <strong>Salvar em Arquivos</strong> ou envie direto pelo WhatsApp.' : 'O PDF já foi baixado para este aparelho. Se precisar de outra cópia, use “Gerar novamente”: ela sai com a data de hoje e os valores atuais.'}</li><li>O botão abre a conversa com a ZR3, com a mensagem pronta.</li><li>Toque no clipe 📎, escolha <strong>Documento</strong>, anexe o PDF e envie.</li></ol>
-      </div>` : ''}
-      <div class="done-act">
-        <button type="button" class="btn ghost" data-act="gerar">${ic('download')}<span>Gerar novamente</span></button>
-        ${podeShare ? `<button type="button" class="btn primary" data-act="compartilhar">${ic('share')}<span>${soShare ? 'Salvar ou compartilhar o PDF' : 'Compartilhar o PDF'}</span></button>` : ''}
-        ${ct.email ? `<a class="btn ghost" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF baixado)">${ic('mail')}<span>Enviar por e-mail</span></a>` : ''}
-      </div>
-      <p class="hint">${soShare ? 'Pelo <strong>Salvar ou compartilhar o PDF</strong>, você também pode enviar o arquivo direto para a conversa da ZR3 no WhatsApp.' : 'O WhatsApp não permite anexar o arquivo automaticamente: é preciso <strong>anexar o PDF baixado</strong> na conversa.'}</p>
+        ${ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF)">${ic('mail')}<span>Prefiro enviar por e-mail</span></a>` : ''}
+        <p class="hint">${soShare ? 'Pelo <strong>Salvar ou compartilhar o PDF</strong>, escolha o WhatsApp e a conversa da ZR3: o arquivo vai junto com a mensagem.' : 'O botão abre a conversa da ZR3 com a mensagem pronta; anexe nela o PDF baixado.'}</p>
+      </div>` : ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}">${ic('mail')}<span>Enviar por e-mail</span></a>` : ''}
       <div class="proximos"><h3>Depois do envio</h3>
         <ol>
           <li>A equipe de personalização confere as suas escolhas e prepara o orçamento definitivo e o projeto atualizado.</li>
@@ -1802,9 +1856,8 @@
       case 'voltar': voltar(); break;
       case 'sacada-info': {
         ev.preventDefault(); ev.stopPropagation();
-        const ss = E.secoes(emp(), S).find((x) => x.tipo === 'sacada'); const r = ss.regras;
-        const lista = (arr) => arr.map(pad2).join(', ').replace(/, ([^,]*)$/, ' e $1');
-        abrirModal(`<ul class="bul"><li><strong>Incluso:</strong> nos finais ${lista(r.inclusoFinais)}${r.gruposSemFinal === 'incluso' ? ' e nos lofts' : ''}, o fechamento de sacada faz parte do padrão de entrega e está contemplado no valor do imóvel. Não é preciso adquiri-lo separadamente.</li><li><strong>Item personalizado:</strong> nos finais ${lista(r.personalizadoFinais)}, o fechamento é obrigatório para quem integrou a sacada ao living na 1ª etapa e opcional para quem não integrou.</li><li><strong>Modelo:</strong> padronizado pela construtora para manter o padrão estético do empreendimento.</li></ul>`, { titulo: 'Fechamento de sacada' });
+
+        abrirModal(`<ul class="bul"><li><strong>Integração da sacada:</strong> retirada da esquadria entre a sacada e o living, feita na 1ª etapa de personalização. A sacada passa a fazer parte do living.</li><li><strong>Fechamento de sacada:</strong> esquadria em vidro instalada sobre o peitoril da sacada, fechando a sacada para o lado externo.</li></ul>`, { titulo: 'Integração x fechamento de sacada' });
         break;
       }
       case 'info-perg': {
@@ -1941,6 +1994,10 @@
       }
       case 'video': abrirVideo(+t.dataset.v); break;
       case 'video-replay': { const v = $modal.querySelector('.vid-modal video'); if (v) { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); } break; }
+      case 'aux-ok': {
+        const sid = t.dataset.s; fecharModal(); aplicarAux(emp(), sid);
+        limparErro(sid); limparErro(sid + '-aux'); salvar(); render(); break;
+      }
       case 'pesquisa': {
         S.pesquisa = S.pesquisa || {}; const q = t.dataset.q, n = +t.dataset.n;
         S.pesquisa[q] = S.pesquisa[q] === n ? 0 : n;
@@ -1997,7 +2054,8 @@
         erros = erros.filter((x) => x.campo !== s.id + '-' + para);
         salvar(); render();
         const sp = E.secao(e, s.id, S), lnP = sp._porAmb && sp._porAmb[para] && sp._porAmb[para].ln;
-        toast(`Mesma escolha aplicada: ${es.amb[para] === 'sim' ? 'quero persiana' + (lnP ? ', com o interruptor ' + E.nomeLinha(lnP) : '') : 'não quero persiana'}.`);
+        const adsP = (s.adicionais || []).filter((ad) => E.ativo(ad) && ((es.adicionais || {})[ad.id] || {})[para]).map((ad) => ad.nome.toLowerCase());
+        toast(`Mesma escolha aplicada: ${es.amb[para] === 'sim' ? 'quero persiana' + (lnP ? ', com o interruptor ' + E.nomeLinha(lnP) : '') + (adsP.length ? ' e ' + adsP.join(', ') : '') : 'não quero persiana'}.`);
         break;
       }
       case 'aux-amb': {
@@ -2113,13 +2171,14 @@
     if (t.dataset.act === 'confirmar') { S.confirmado = t.checked; salvar(false); render(); return; }
     if (t.dataset.act === 'pers-modelo') { const es = E.esc(S, t.dataset.s); es.modelos = es.modelos || {}; es.modelos[t.dataset.a] = t.value; limparErro(t.dataset.s); salvar(); render(); return; }
     if (t.dataset.act === 'aux') {
-      const es = E.esc(S, t.dataset.s); es.auxilio = t.checked;
-      if (t.checked) {
-        es.nenhum = false;
-        const s = E.secao(e, t.dataset.s);
-        if (s && s.linhasMultiplas) { gruposEdit(s).forEach((g) => { g.qtd = {}; }); sincronizarQtd(s); } else es.qtd = {};
-        toast('Com o auxílio, a equipe da ZR3 faz a contagem das peças. Escolha só a linha de preferência.');
-      } else es.auxAmb = [];
+      const es = E.esc(S, t.dataset.s);
+      if (t.checked && E.qtdItens(S, E.secao(e, t.dataset.s, S)).length) {
+
+        t.checked = false;
+        abrirModal(`<p>Você já informou peças nesta seção. Com o auxílio da ZR3, as quantidades informadas serão apagadas e fica só a linha de preferência; a equipe faz a contagem.</p><p>Deseja marcar o auxílio mesmo assim?</p><div class="modal-act"><button type="button" class="btn ghost" data-act="fechar-modal">Manter as minhas quantidades</button><button type="button" class="btn primary" data-act="aux-ok" data-s="${esc(t.dataset.s)}">Sim, quero o auxílio</button></div>`, { titulo: 'Apagar as quantidades?' });
+        return;
+      }
+      if (t.checked) aplicarAux(e, t.dataset.s); else { es.auxilio = false; es.auxAmb = []; }
       limparErro(t.dataset.s); limparErro(t.dataset.s + '-aux'); salvar(); render(); return;
     }
     if (t.dataset.act === 'acion') {
@@ -2159,12 +2218,14 @@
     if (S.cliente.final !== ultimoFinal) { const es = S.escolhas.sacada; if (es) { es.ciente = false; } ultimoFinal = S.cliente.final; }
   }
 
+  document.addEventListener('input', () => setTimeout(atualizarAvancar, 0));
   document.addEventListener('input', (ev) => {
     const t = ev.target;
-    if (t.dataset.gobs != null) {
-      const s = E.secao(emp(), t.dataset.s); const g = s && gruposEdit(s)[+t.dataset.gobs];
-      if (g) { g.obs = t.value.slice(0, 160); salvar(); }
-      return;
+    if (t.dataset.loc != null) {
+      const es = E.esc(S, t.dataset.s); es.locais = es.locais || {};
+      const v = t.value.slice(0, 80);
+      if (v.trim()) es.locais[t.dataset.loc] = v; else delete es.locais[t.dataset.loc];
+      salvar(); return;
     }
     const b = t.dataset.bind;
     if (b && b !== 'empId' && b !== 'contatoTipo') {
@@ -2241,17 +2302,47 @@
     if (!ev.target.closest('#un-combo')) comboFechar();
   });
 
+  const ATR_TELA = /^(data-(act|s|v|o|a|i|g|d|k|lid|src|legenda|nota|ad|p|q|n|de|para|tela|bind|bind-texto|loc|gobs)|type|tabindex|loading|decoding|role|for|rows|maxlength|placeholder|autocomplete|inputmode|title|aria-(hidden|label|labelledby|live|describedby|invalid|disabled|modal|controls|expanded))$/;
+  function limparRegistro(html) {
+    const t = document.createElement('template'); t.innerHTML = html;
+    t.content.querySelectorAll('svg, [hidden], .pcard-more, details.more, .thumbs, .gallery ~ .caption, .help, .stepper button, .vid-bar, .add-linha, .add-linha-dica, .copiar, .lstep-acts, [data-act="linha-trocar"], [data-act="goto"], [data-act="grupo-del"], [data-act="sacada-info"], [data-act="protocolos"], [data-act="saiba-q"], .linha-cap, .ext-aviso').forEach((n) => n.remove());
+    t.content.querySelectorAll('*').forEach((el) => {
+      [...el.attributes].forEach((at) => {
+        const n = at.name;
+        if (n === 'aria-pressed' || n === 'aria-checked') { if (at.value === 'true') el.classList.add('sel'); el.removeAttribute(n); }
+        else if (ATR_TELA.test(n)) el.removeAttribute(n);
+      });
+      const cl = (el.getAttribute('class') || '').trim().replace(/\s+/g, ' ');
+      if (!cl) el.removeAttribute('class'); else el.setAttribute('class', cl);
+    });
+    return t.innerHTML;
+  }
+
+  function escolhasLimpas(esc) {
+    const limpar = (v) => {
+      if (Array.isArray(v)) { const l = v.map(limpar).filter((x) => x !== undefined); return l.length ? l : undefined; }
+      if (v && typeof v === 'object') {
+        const o = {};
+        Object.entries(v).forEach(([k, x]) => { if (k === 'tom' || x === false || x === 0 || x === '' || x == null) return; const y = limpar(x); if (y !== undefined) o[k] = y; });
+        return Object.keys(o).length ? o : undefined;
+      }
+      return v;
+    };
+    const base = {};
+    Object.entries(esc || {}).forEach(([k, v]) => { base[k] = v && v.nenhum ? { nenhum: true } : v; });
+    return limpar(base) || {};
+  }
   function registroHtml(e, protocolo, agora, codigoTabela) {
     const antes = { erros, abertas: [...linhasAbertas] };
     captura = true; erros = []; linhasAbertas.clear();
     try {
       const C0 = '<' + '!--', C1 = '--' + '>', SC = 'scr' + 'ipt';
-      const partes = E.etapas(e, S).map((et) => `${C0} etapa: ${et.id} ${C1}${telaEtapa(e, et)}`);
+      const partes = E.etapas(e, S).map((et) => `${C0} etapa: ${et.id} ${C1}${limparRegistro(telaEtapa(e, et))}`);
       const cab = `${C0} registro ${protocolo} · ${agora.toISOString()} · versão ${CFG.versao || '—'} · tabela ${codigoTabela} · ${S.cliente.nome} · unidade ${S.cliente.unidade} ${C1}`;
-      const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: S.escolhas, pesquisa: S.pesquisa || null }).replace(/</g, '\\u003c')}</${SC}>`;
+      const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: escolhasLimpas(S.escolhas), pesquisa: S.pesquisa || null }).replace(/</g, '\\u003c')}</${SC}>`;
 
       const P = CFG.pesquisa, R = S.pesquisa || {};
-      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] ? R[q.id] + '/5 · ' + esc((P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
+      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] ? R[q.id] + '/5 · ' + esc((q.rotulos || P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
 
       const nomes = new Map(Object.entries(window.ZR3_ASSETS || {}).map(([k, v]) => [v, k]));
       const semEmbutidos = (h) => h.replace(/data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]+/gi, (m) => nomes.get(m) || 'data:(arquivo embutido)');
@@ -2347,7 +2438,7 @@
     if (!ultimoPdf) return;
     try {
       await navigator.share({ files: [ultimoPdf.file], title: 'Personalização 3ª etapa', text: msgWhats(emp()) });
-    } catch (e) { if (e && e.name !== 'AbortError') toast('Compartilhamento indisponível. Use “Baixar novamente”.'); }
+    } catch (e) { if (e && e.name !== 'AbortError') toast('Compartilhamento indisponível. Use “Gerar novamente” para baixar o PDF.'); }
   }
 
   function armarVoltar() { try { if (!(history.state && history.state.zr3)) history.pushState({ zr3: 1 }, ''); } catch (e) {   } }

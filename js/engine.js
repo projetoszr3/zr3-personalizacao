@@ -127,10 +127,15 @@
     return { i, raw: g, ln, itens };
   });
 
+  E.chaveLocal = (g, itemId, k) => `${(g && g.linha) || ''}|${(g && g.cor) || ''}|${itemId}|${k}`;
   E.qtdItens = (S, sec) => {
     const es = ((S && S.escolhas) || {})[sec.id] || {};
     if (sec.auxilio && es.auxilio) return [];
-    if (sec._grupos) return sec._grupos.flatMap((g) => g.itens.map((it) => ({ it, n: (g.raw.qtd || {})[it.id] || 0, ln: g.ln, obs: g.raw.obs || '' })).filter((x) => x.n > 0));
+    if (sec._grupos) return sec._grupos.flatMap((g) => g.itens.map((it) => {
+      const n = (g.raw.qtd || {})[it.id] || 0;
+      const locais = []; for (let k = 1; k <= n; k++) locais.push(((es.locais || {})[E.chaveLocal(g.raw, it.id, k)] || '').trim());
+      return { it, n, ln: g.ln, obs: g.raw.obs || '', locais };
+    }).filter((x) => x.n > 0));
     return (sec.itens || []).filter(E.ativo).map((it) => ({ it, n: (es.qtd || {})[it.id] || 0, ln: sec._linha })).filter((x) => x.n > 0);
   };
 
@@ -533,6 +538,8 @@
             const specs = p.demo ? [] : (p.specs || []).slice(0, 4).map((x) => x.join(': '));
             const b = Object.assign({}, base, { item: sec.titulo, imagem: p.imagem, specs });
             if (sc.modo === 'incluso') push(Object.assign(b, { detalhe: `${p.nome}. Incluso no padrão de entrega – ${sc.grupoNome && !sc.final ? sc.grupoNome : 'final ' + E.pad2(sc.final)}.`, unit: 0, total: 0, status: 'incluso' }));
+
+            else if ((sc.modo === 'obrigatorio' || sc.modo === 'opcional') && sc.fonte !== 'cadastro' && !e.ciente) break;
             else if (sc.modo === 'obrigatorio') push(Object.assign(b, { detalhe: `${p.nome}. Obrigatório: unidade com integração da sacada${sc.fonte === 'cadastro' ? ' (cadastro ZR3)' : ' (informado pelo cliente)'}.`, unit: sc.valor, total: sc.valor, status: 'obrigatorio' }));
             else if (sc.modo === 'confirmar') push(Object.assign(b, { detalhe: `${p.nome}. Cliente não soube informar a integração: a ZR3 confirmará. Se houver integração, o item é obrigatório (${E.brl(sc.valor)}).`, unit: null, total: null, status: 'confirmar' }));
             else if (sc.modo === 'opcional') {
@@ -564,9 +571,9 @@
               push(Object.assign({}, base, { item: `${sec.aba || sec.titulo} – auxílio na quantificação`, detalhe: `Cliente tem interesse e solicita auxílio da ZR3 para a contagem dos circuitos e peças. Ambientes: ${(e.auxAmb || []).join(', ')}.${pref.length ? ` Linha de preferência: ${pref.join('; ')}.` : ''}`, status: 'consulta' }));
             }
             if (e.nenhum && !Object.values(e.qtd || {}).some((n) => n > 0)) { push(Object.assign({}, base, { item: sec.titulo, detalhe: 'Não contratado.', status: 'nao', imagem: sec.imagem || ((sec.itens || []).find((it) => E.ativo(it) && it.imagem) || {}).imagem })); break; }
-            E.qtdItens(S, sec).forEach(({ it, n, ln, obs }) => {
+            E.qtdItens(S, sec).forEach(({ it, n, ln, obs, locais }) => {
               const escI = it.escolha && (it.escolha.opcoes || []).find((o) => o.id === (e.itemEscolha || {})[it.id]);
-              push(Object.assign({}, base, { item: it.nome, detalhe: [sec.titulo, ln ? 'Linha ' + E.nomeLinha(ln) + (E.protocoloLinha(ln) ? ' (' + E.protocoloLinha(ln) + ')' : '') : '', it.subtitulo, escI ? (escI.resumo || `${it.escolha.titulo}: ${escI.rotulo}`) : '', obs ? 'Local: ' + obs : ''].filter(Boolean).join(' · '), qtd: n, unit: it.valor, total: it.valor == null ? null : it.valor * n, status: it.valor == null ? 'consulta' : 'opcional', imagem: it.imagem }));
+              push(Object.assign({}, base, { item: it.nome, detalhe: [sec.titulo, ln ? 'Linha ' + E.nomeLinha(ln) + (E.protocoloLinha(ln) ? ' (' + E.protocoloLinha(ln) + ')' : '') : '', it.subtitulo, escI ? (escI.resumo || `${it.escolha.titulo}: ${escI.rotulo}`) : '', obs ? 'Local: ' + obs : '', (locais || []).some(Boolean) ? 'Locais: ' + locais.map((l, i) => (l ? `${i + 1}) ${l}` : null)).filter(Boolean).join('; ') : ''].filter(Boolean).join(' · '), qtd: n, unit: it.valor, total: it.valor == null ? null : it.valor * n, status: it.valor == null ? 'consulta' : 'opcional', imagem: it.imagem }));
             });
             break;
           case 'pergunta': {

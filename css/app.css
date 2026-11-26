@@ -873,3 +873,64 @@ button.link.qmais, .rgroup button.link, .callout button.link { min-height: 44px;
   .opt-tx > h3 { grid-column: 2; grid-row: 2; align-self: start; }
   .opt-tx > .pcard-badges:empty + h3 { grid-row: 1 / span 2; align-self: center; }
 }
+
+.cta-fixa, .cta-espaco { display: none; }
+@media (max-width: 720px) {
+  .cta-espaco { display: block; }
+  .cta-fixa { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgba(16,24,40,.08); }
+  .cta-fixa .btn { width: 100%; justify-content: center; }
+  .cta-espaco { height: 84px; }
+}
+
+.d-block { display: block; }
+
+.lc-img[data-act="zoom"] { cursor: zoom-in; }
+.lr-desc { display: block; font-size: 13px; color: var(--text-2); margin: 2px 0; }
+
+.sheet { max-height: 92vh; max-height: 92dvh; }
+.sheet-head { flex-shrink: 0; position: sticky; top: 0; background: #fff; z-index: 2; border-radius: inherit; }
+.sheet-head .icon-btn { width: 44px; height: 44px; flex-shrink: 0; background: var(--bg); border-radius: 50%; }
+.sheet-body { flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; }
+.zoom img { max-height: 62vh; max-height: 62dvh; }
+@media (min-width: 760px) { .sheet { max-height: 88vh; max-height: 88dvh; } }
+
+.acion-op input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 1px 0 0; border: 2px solid #98a2b3; border-radius: 4px; background: #fff center / 16px no-repeat; flex: none; cursor: pointer; }
+.acion-op input[type="checkbox"]:checked { border-color: var(--navy); background-color: var(--navy); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+.acion-op input[type="checkbox"]:disabled { cursor: not-allowed; background-color: #eaecf0; }
+.acion-op input[type="checkbox"]:focus-visible { outline: 2px solid var(--blue, #2E75B6); outline-offset: 2px; }
+.acion-op.is-fixo { background: #f2f4f7; border-color: #d0d5dd; }
+.acion-op.is-fixo .fixo-box { background: #98a2b3; border-radius: 4px; }
+
+.qcompacta .qrow { grid-template-columns: 56px 1fr auto; padding: 10px 12px; }
+.qcompacta .stepper { grid-column: auto; justify-self: end; }
+.qcompacta .stepper button { width: 34px; height: 34px; }
+.qcompacta .stepper output { min-width: 24px; font-size: 15px; }
+.qcompacta .qtx strong { font-size: 15px; }
+.g-obs { display: grid; gap: 4px; margin: 10px 0 4px; font-size: 14px; color: var(--text-2); }
+.g-obs small { color: var(--muted); font-weight: 400; }
+.g-obs input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border-2); border-radius: var(--r-sm); font: inherit; font-size: 16px; background: #fff; }
+.ph span { font-size: 12px; }
+
+.t-row .t-sub { white-space: nowrap; }
+@media (max-width: 559px) { .t-row .t-sub { display: block; font-size: 13px; font-weight: 400; color: var(--muted); } }
+
+.vid-modal { position: relative; }
+.vid-replay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .94); color: var(--navy); font: 600 15px var(--ff-h, inherit); box-shadow: 0 6px 20px rgba(0, 0, 0, .3); cursor: pointer; }
+.vid-replay[hidden] { display: none; }
+.vid-replay .ic { width: 20px; height: 20px; }
+.ext-aviso { display: flex; gap: 6px; align-items: center; margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.ext-aviso .ic { width: 14px; height: 14px; flex: none; }
+
+.pesquisa .pq { padding: 10px 0; border-top: 1px solid var(--border); }
+.pesquisa .pq:first-of-type { border-top: 0; }
+.pq-t { margin: 0 0 6px; font-weight: 600; color: var(--text); }
+.stars { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.star { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: #d0d5dd; cursor: pointer; padding: 0; }
+.star .ic { width: 30px; height: 30px; fill: currentColor; }
+.star.on { color: #f5b301; }
+.pq-r { margin-left: 6px; font-size: 14px; color: var(--muted); }
+.card.aux + .lb-intro, .card.aux { margin-bottom: 12px; }
+.totals .t-row .t-sub { color: rgba(255, 255, 255, .72); font-weight: 400; }
+.pesquisa > .muted { margin: 0 0 4px; }
+
+@media (max-width: 720px) { .so-desk { display: none !important; } }

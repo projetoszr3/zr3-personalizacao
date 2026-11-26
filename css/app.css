@@ -969,3 +969,16 @@ button.link.qmais, .rgroup button.link, .callout button.link { min-height: 44px;
   html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   #app { position: fixed; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
 }
+
+.bb-btn.btn.primary.incompleto, .bb-btn.btn.primary.incompleto:hover:not(:disabled) { outline: none; }
+
+#toast .t-lin { display: flex; justify-content: space-between; gap: 12px; }
+#toast .t-lin strong { white-space: nowrap; }
+
+.price .ded, .lr-tx .ded { font-size: .82em; font-weight: 600; }
+
+.ext-aviso { display: flex; justify-content: center; align-items: center; gap: 4px; text-align: center; margin: 6px auto 0; font-size: 12px; line-height: 1.3; }
+.ext-aviso .ic { width: 12px; height: 12px; flex: none; }
+.acion-op.is-fixo { cursor: not-allowed; }
+.video-link + .ext-aviso { margin: -6px auto 0; padding: 0 12px 12px; }
+#toast .t-lin { display: block; }

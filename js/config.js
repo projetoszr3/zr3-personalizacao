@@ -146,7 +146,7 @@
       imagem: 'assets/img/vaso-basico-sabara.jpg', resumo: 'Vaso padrão em kit, já com tampa e assento.',
       galeria: [
         { src: 'assets/img/vaso-basico-sabara.jpg', legenda: 'Vaso sanitário Icasa, linha Sabará, com caixa acoplada, tampa e assento.' },
-        { src: 'assets/img/vaso-sabara-kit.jpg', legenda: 'Combo Sabará: vaso com caixa acoplada, tampa e assento, entregue com os acessórios de instalação (anel de vedação, engate flexível e fixadores).' },
+        { src: 'assets/img/vaso-sabara-kit.jpg', legenda: 'Combo Sabará: vaso com caixa acoplada, tampa e assento, entregue instalado com os acessórios (anel de vedação, engate flexível e fixadores).' },
         { src: 'assets/img/vaso-sabara-frontal.png', legenda: 'Vista frontal: largura de 410 mm e altura total de 765 mm.', nota: 'Dimensões do fabricante.' },
         { src: 'assets/img/vaso-sabara-lateral.png', legenda: 'Vista lateral: profundidade de 640 mm e altura da bacia de 390 mm.', nota: 'Dimensões do fabricante.' }
       ],
@@ -159,7 +159,7 @@
       imagem: 'assets/img/vaso-intermediario-etna.jpg', resumo: 'Desenho moderno e esbelto, com tampa e assento.',
       galeria: [
         { src: 'assets/img/vaso-intermediario-etna.jpg', legenda: 'Vaso sanitário Icasa, linha Etna, com caixa acoplada, tampa e assento.' },
-        { src: 'assets/img/vaso-etna-kit.jpg', legenda: 'Combo Etna: vaso com caixa acoplada, tampa e assento, entregue com os acessórios de instalação (anel de vedação, engate flexível e fixadores).' },
+        { src: 'assets/img/vaso-etna-kit.jpg', legenda: 'Combo Etna: vaso com caixa acoplada, tampa e assento, entregue instalado com os acessórios (anel de vedação, engate flexível e fixadores).' },
         { src: 'assets/img/vaso-etna-frontal.png', legenda: 'Vista frontal: largura de 390 mm e altura total de 770 mm.', nota: 'Dimensões do fabricante.' },
         { src: 'assets/img/vaso-etna-lateral.png', legenda: 'Vista lateral: profundidade de 635 mm e altura da bacia de 400 mm.', nota: 'Dimensões do fabricante.' }
       ],
@@ -173,7 +173,7 @@
       resumo: 'Linha superior de formas arredondadas e suaves, com tampa e assento.',
       galeria: [
         { src: 'assets/img/vaso-bari.jpg', legenda: 'Vaso sanitário Icasa, linha Bari, com caixa acoplada, tampa e assento.' },
-        { src: 'assets/img/vaso-bari-kit.jpg', legenda: 'Combo Bari: vaso com caixa acoplada, tampa e assento, entregue com os acessórios de instalação (anel de vedação, engate flexível e fixadores).' },
+        { src: 'assets/img/vaso-bari-kit.jpg', legenda: 'Combo Bari: vaso com caixa acoplada, tampa e assento, entregue instalado com os acessórios (anel de vedação, engate flexível e fixadores).' },
         { src: 'assets/img/vaso-bari-frontal.png', legenda: 'Vista frontal: largura de 400 mm e altura total de 750 mm.', nota: 'Dimensões do fabricante.' },
         { src: 'assets/img/vaso-bari-lateral.png', legenda: 'Vista lateral: profundidade de 685 mm e altura da bacia de 395 mm.', nota: 'Dimensões do fabricante.' }
       ],
@@ -187,7 +187,7 @@
       resumo: 'Linha superior de formas retas e quadradas, com tampa e assento.',
       galeria: [
         { src: 'assets/img/vaso-asti.jpg', legenda: 'Vaso sanitário Icasa, linha Asti, com caixa acoplada, tampa e assento.' },
-        { src: 'assets/img/vaso-asti-kit.jpg', legenda: 'Combo Asti: vaso com caixa acoplada, tampa e assento, entregue com os acessórios de instalação (anel de vedação, engate flexível e fixadores).' },
+        { src: 'assets/img/vaso-asti-kit.jpg', legenda: 'Combo Asti: vaso com caixa acoplada, tampa e assento, entregue instalado com os acessórios (anel de vedação, engate flexível e fixadores).' },
         { src: 'assets/img/vaso-asti-frontal.png', legenda: 'Vista frontal: largura de 370 mm e altura total de 750 mm.', nota: 'Dimensões do fabricante.' },
         { src: 'assets/img/vaso-asti-lateral.png', legenda: 'Vista lateral: profundidade de 660 mm e altura da bacia de 390 mm.', nota: 'Dimensões do fabricante.' }
       ],
@@ -199,7 +199,6 @@
   const VASO_SUITE = {
     tipo: 'unica',
     id: 'vaso-suite',
-    video: { arquivo: 'assets/video/video-vasos.mp4', capa: 'assets/video/video-vasos.jpg', titulo: 'Vasos sanitários', inicio: 0 },
     aba: 'Banheiro da suíte',
     titulo: 'Vaso sanitário · banheiro da suíte',
     descricao: 'Modelos pensados em estética, ergonomia e conforto. Os personalizados são entregues com os acessórios necessários para o uso: tampa, assento, anel de vedação, fixadores e engates.',
@@ -217,7 +216,8 @@
     aba: 'Banheiro social',
     copiarDe: 'vaso-suite',
     titulo: 'Vaso sanitário · banheiro social',
-    descricao: 'Escolha o modelo do banheiro social. Pode ser diferente do escolhido para a suíte.',
+    descricao: 'Escolha o modelo do banheiro social.',
+    descricaoComOrigem: 'Pode ser diferente do escolhido para a suíte.',
     ocultarSe: { secao: 'banheiro-removido', resposta: 'social' },
     opcoes: opcoesVaso('vaso-social', ['3.1.6', '3.1.7', '3.1.8', '3.1.9', '3.1.10'])
   });
@@ -235,13 +235,13 @@
     opcoes: [
       {
         id: 'espelho-padrao', cheki: '3.2.1',
-        nome: 'Padrão',
+        nome: 'Curvo',
         subtitulo: 'WEG · linha Composé · branco',
         imagem: 'assets/img/espelho-padrao.jpg',
         galeria: [
-          { src: 'assets/img/espelho-padrao.jpg', legenda: 'Acabamento padrão: interruptor de 2 teclas com tomada.' },
-          { src: 'assets/img/espelho-padrao-3teclas.jpg', legenda: 'Acabamento padrão: interruptor de 3 teclas.' },
-          { src: 'assets/img/espelho-padrao-tomadas.jpg', legenda: 'Acabamento padrão: tomadas tripla, dupla e simples. A composição de cada ponto segue o projeto elétrico.' }
+          { src: 'assets/img/espelho-padrao.jpg', legenda: 'Acabamento curvo (padrão de entrega): interruptor de 2 teclas com tomada.' },
+          { src: 'assets/img/espelho-padrao-3teclas.jpg', legenda: 'Acabamento curvo (padrão de entrega): interruptor de 3 teclas.' },
+          { src: 'assets/img/espelho-padrao-tomadas.jpg', legenda: 'Acabamento curvo (padrão de entrega): tomadas tripla, dupla e simples. A composição de cada ponto segue o projeto elétrico.' }
         ],
         resumo: 'Modelo de entrega do empreendimento.',
         specs: [['Fabricante', 'WEG'], ['Linha', 'Composé'], ['Formato', 'Curvo / teclas arredondadas'], ['Cor', 'Branco'], ['Aplicação', 'Todos os pontos do projeto']],
@@ -250,7 +250,7 @@
       },
       {
         id: 'espelho-quadrada-branco', cheki: '3.2.2',
-        nome: 'Quadrada (branco)',
+        nome: 'Quadrado (branco)',
         subtitulo: 'WEG · linha Esatta · branco',
         imagem: 'assets/img/espelho-quadrada-branco-capa.jpg',
         galeria: [
@@ -264,7 +264,7 @@
       },
       {
         id: 'espelho-quadrada-preto', cheki: '3.2.3',
-        nome: 'Quadrada (preto grafite)',
+        nome: 'Quadrado (preto grafite)',
         subtitulo: 'WEG · linha Esatta · preto grafite',
         imagem: 'assets/img/espelho-quadrada-preto-capa.jpg',
         galeria: [
@@ -286,10 +286,10 @@
     aba: 'Fechadura',
     titulo: 'Fechadura digital',
     resumoCurto: 'Abre com digital, senha, tag, aplicativo ou chave.', inclui: ['produto', 'instalacao', 'configuracao'],
-    descricao: 'Instalada na porta de entrada da unidade. O valor inclui a instalação e a configuração: conexão à rede e cadastro de usuários, digitais e senhas.',
+    descricao: 'Instalada na porta de entrada da unidade. O valor inclui a instalação, configuração, conexão à rede, cadastro de usuários, digitais, tags e senhas.',
     obrigatoria: true,
     cobranca: 'por unidade',
-    nenhuma: { rotulo: 'Não desejo fechadura digital', descricao: 'A porta de entrada será entregue com a fechadura padrão.' },
+    nenhuma: { rotulo: 'Fechadura comum (padrão)', descricao: 'Padrão de entrega: a porta de entrada recebe a fechadura comum, sem custo.', noTopo: true },
     opcoes: [
       {
         id: 'fechadura-smart-wifi', cheki: '4.9.5',
@@ -297,7 +297,7 @@
         subtitulo: 'Nova Digital · SL-SHINE · digital, senha, tag, app ou chave',
         imagem: 'assets/img/nd-fechadura-frente-verso.jpg',
         galeria: [
-          { src: 'assets/img/nd-fechadura-frente-verso.jpg', legenda: 'Fechadura Black Shine: lado externo (teclado e leitor de digital) e lado interno.' },
+          { src: 'assets/img/nd-fechadura-frente-verso.jpg', legenda: 'Fechadura Black Shine: lado interno (à esquerda) e lado externo, com teclado e leitor de digital (à direita).' },
           { src: 'assets/img/nd-fechadura-caixa.jpg', legenda: 'Fechadura inteligente Wi-Fi Black Shine, Nova Digital, com a embalagem.' },
           { src: 'assets/img/nd-fechadura-ambiente.jpg', legenda: 'Acabamento preto, com leitor de digital na maçaneta.' },
           { src: 'assets/img/nd-fechadura-emergencia.jpg', legenda: 'Abertura de emergência: entrada para powerbank e chave mecânica.' }
@@ -312,7 +312,7 @@
           ['Alimentação', '4 pilhas AA; entrada para powerbank (5 V) em emergência'],
           ['Porta', 'Espessura de 35 a 65 mm'],
           ['Dimensões', '264 × 151 × 71,5 mm'],
-          ['Instalação e configuração', 'Incluídas no valor: conexão à rede e cadastro de usuários, digitais e senhas']
+          ['Instalação e configuração', 'Incluídas no valor: instalação, configuração, conexão à rede, cadastro de usuários, digitais, tags e senhas']
         ],
         valor: 1050
       }
@@ -427,11 +427,11 @@
   const LINHAS_PERSIANA = Object.assign({}, LINHAS_INTERRUPTOR, {
     id: 'linha-persiana',
     titulo: 'Cor e linha do interruptor da persiana',
-    descricao: 'Vale para o interruptor de todas as persianas da unidade. Pode ser diferente dos interruptores da automação. Na linha Touch - Vidro, a persiana tem interruptor próprio; nas demais, usa o interruptor de 3 teclas da linha.',
+    descricao: 'Pode ser diferente em cada ambiente e dos interruptores da automação. Na linha Touch - Vidro, a persiana tem interruptor próprio; nas demais, usa o interruptor de 3 teclas da linha.',
     uso: 'o interruptor da persiana',
     fotosEmLoop: false,
     pecaFoto: 'persiana',
-    resumoEscolha: 'Vale para todas as persianas da unidade.'
+    resumoEscolha: 'Vale para a persiana deste ambiente.'
   });
 
   const AUTO_INTERRUPTORES = {
@@ -439,6 +439,7 @@
     id: 'auto-interruptores',
     aba: 'Interruptores',
     titulo: 'Interruptores e tomadas automatizados',
+    capa: 'assets/img/nd-touchled-branco-tecla-tripla.jpg',
     resumoCurto: 'Luzes e tomadas pelo interruptor, pelo aplicativo ou por voz.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
 
     requer: { secao: 'preparacao', resposta: 'sim', mensagem: 'Os interruptores inteligentes só podem ser escolhidos com a preparação elétrica para automação.' },
@@ -481,21 +482,20 @@
     aba: 'Preparação elétrica',
     titulo: 'Preparação elétrica para automação',
     resumoCurto: 'Deixa a fiação pronta para automatizar a iluminação.', inclui: ['fiacao'], naoInclui: 'produtos, instalação e configuração de dispositivos',
-    nome: 'Passagem de fiação: neutro nas caixas de interruptor dos pontos de iluminação',
+    nome: 'Passagem de fiação: neutro',
     descricao: 'Passagem do fio neutro nas caixas de interruptor dos pontos de iluminação, feita pela ZR3 durante a obra. É necessária para os interruptores e tomadas inteligentes desta etapa e também para quem quiser automatizar por conta própria depois da entrega. Não inclui produtos nem instalação de dispositivos.',
     imagem: 'assets/img/preparacao-fiacao.jpg',
     valor: 425,
     valorPorGrupo: { 'final-02': 350, 'final-07': 350, 'loft-201': 350, 'loft-206': 350, 'lofts-202-205': 350 },
-    ajuda: 'neutro',
     rotuloSim: 'Quero a preparação',
     rotuloNao: 'Não quero',
     blocos: [
-      { titulo: 'Para que serve o neutro', texto: 'Interruptores inteligentes sem fio precisam de alimentação contínua para manter o módulo Wi-Fi/Zigbee ligado mesmo com a luz apagada — e isso exige o neutro na caixa do interruptor.' }
+      { titulo: 'O que é o neutro e para que serve', texto: 'O neutro é o fio que fecha o circuito elétrico junto com a fase. Interruptores inteligentes sem fio precisam dele na caixa para ficarem sempre energizados e conectados à rede (Wi-Fi ou Zigbee), mesmo com a luz apagada.' }
     ],
 
     aceite: {
       titulo: 'Escopo da preparação elétrica para automação',
-      texto: 'Inclui somente a passagem de fiação: neutro nas caixas de interruptor dos pontos de iluminação, para dispositivos sem fio (Wi-Fi ou Zigbee). Não inclui cabeamento de rede, hubs, centrais nem automação cabeada. Produtos comprados nesta etapa já têm instalação e configuração incluídas; dispositivos comprados por conta própria são de responsabilidade do cliente.',
+      texto: 'Inclui somente a passagem do neutro nas caixas de interruptor dos pontos de iluminação. Não inclui produtos, cabeamento de rede, hubs nem automação cabeada. Dispositivos comprados por conta própria são de responsabilidade do cliente.',
       rotulo: 'Li e aceito o escopo da preparação elétrica para automação.'
     }
   };
@@ -510,7 +510,7 @@
     titulo: 'Automação do exaustor central da churrasqueira',
     resumoCurto: 'Aciona o exaustor central pelo aplicativo, por voz ou por interruptor.', inclui: ['produto', 'instalacao', 'configuracao'],
     nome: 'Acionamento automatizado do exaustor central',
-    descricao: 'O exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ficar ligado sempre que você usar a churrasqueira, com qualquer vento, para a fumaça não voltar para os apartamentos. O comando dele fica na cobertura; com a automação, você liga de dentro da sua unidade.',
+    descricao: 'O exaustor central puxa a fumaça de todas as churrasqueiras da prumada e deve ficar ligado sempre que você usar a churrasqueira, para a fumaça não voltar para os apartamentos. O comando dele fica na caixa de comando no pavimento da cobertura; com a automação, você liga de dentro da sua unidade.',
     avisoNao: { titulo: 'Tem certeza?', texto: 'Sem a automação, para usar a churrasqueira você vai precisar subir até a cobertura para ligar o exaustor central. Sem ele ligado, a fumaça pode voltar para dentro dos apartamentos.' },
     imagem: 'assets/img/exaustor-app.jpg',
     valor: 75,
@@ -520,19 +520,19 @@
     linhas: LINHAS_EXAUSTOR,
     linhaRotulo: 'Interruptor da churrasqueira',
     acionamento: {
-      titulo: 'Como você quer acionar o exaustor?',
-      padrao: { rotulo: 'Pelo aplicativo no celular', descricao: 'Sempre incluído: liga e desliga o exaustor central de onde você estiver.' },
+      titulo: 'Formas possíveis de acionar',
+      padrao: { rotulo: 'Aplicativo no celular', descricao: 'Sempre incluído: liga e desliga o exaustor central de onde você estiver.' },
       opcoes: [
-        { id: 'voz', rotulo: 'Também por voz', descricao: 'Exige a programação da assistente de voz, que já fica marcada na aba dela.',
+        { id: 'voz', rotulo: 'Voz', descricao: 'Exige a programação da assistente de voz, que já fica marcada na aba dela.',
           marca: { secao: 'alexa', resposta: 'sim', mensagem: 'Para acionar o exaustor por voz, é necessária a programação da assistente de voz.', acao: 'Mantenha a programação ou mude a forma de acionamento na aba Exaustor.' } },
-        { id: 'interruptor', rotulo: 'Também por interruptor na churrasqueira', descricao: 'O interruptor ao lado da churrasqueira é trocado por um inteligente, na linha e na cor escolhidas, com uma tecla para o exaustor.',
+        { id: 'interruptor', rotulo: 'Interruptor na churrasqueira', descricao: 'O interruptor ao lado da churrasqueira é trocado por um inteligente, na linha e na cor escolhidas, com uma tecla para os exaustores.',
           destaque: 'Vantagem: uma tecla só liga os dois exaustores juntos, o central e o da sua churrasqueira.' }
       ],
       pecas: {
         titulo: 'Qual é o interruptor da churrasqueira?',
         descricao: 'Escolha como fica a caixa ao lado da churrasqueira, já contando a tecla do exaustor.',
         opcoes: [
-          { id: 'tecla-simples', nome: '1 tecla (só o exaustor)' },
+          { id: 'tecla-simples', nome: '1 tecla' },
           { id: 'tecla-dupla', nome: '2 teclas' },
           { id: 'tecla-tripla', nome: '3 teclas' },
           { id: 'tomada-simples', nome: 'Tomada + 1 tecla' },
@@ -544,8 +544,9 @@
       avisoSem: { opcao: 'interruptor', texto: 'Atenção: sem o interruptor, o aplicativo e a voz ligam só o exaustor central. O exaustor da sua churrasqueira continua ligando pela luz interna dela, então acenda a luz sempre que usar a churrasqueira.' }
     },
     blocos: [
-      { titulo: 'Como funciona', texto: 'O exaustor central atende todas as churrasqueiras da mesma prumada (mesmo final de apartamento) e deve estar ligado sempre que a churrasqueira for usada. Com a automação, você liga sem ir até a cobertura.' },
-      { titulo: 'Formas de acionamento', itens: ['Aplicativo no celular', 'Comando de voz (assistente compatível)', 'Interruptor na churrasqueira: liga o exaustor central e o da sua churrasqueira juntos, numa tecla só'] }
+      { titulo: 'Exaustor central x exaustor da churrasqueira', texto: 'São dois equipamentos: o exaustor central, na cobertura, atende todas as churrasqueiras do mesmo final de apartamento; o exaustor da sua churrasqueira fica na coifa e hoje liga junto com a luz interna dela. Os dois precisam estar ligados para a tiragem funcionar bem.' },
+      { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido pelo cliente'] },
+      { titulo: 'Boas práticas', itens: ['Ligue o exaustor alguns minutos antes de acender a churrasqueira', 'Mantenha ligado até a brasa apagar totalmente', 'Programar o desligamento pelo aplicativo evita esquecer o exaustor ligado'] }
     ]
   };
 
@@ -555,18 +556,18 @@
     aba: 'Programação da assistente de voz',
     cheki: '4.9.1',
     titulo: 'Programação da assistente de voz',
-    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho da assistente de voz (Amazon Echo), adquirido pelo cliente',
-    nome: 'Programação da assistente de voz: criação de cenas e rotinas',
-    descricao: 'Cenas e rotinas por voz para os seus dispositivos automatizados (ex.: “boa noite” apaga as luzes e fecha as persianas). Sem a programação, tudo funciona pelo interruptor e pelo aplicativo, só sem as cenas prontas. O aparelho (Amazon Echo) é adquirido pelo cliente.',
+    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho da assistente de voz, o qual deve ser adquirido pelo cliente',
+    nome: 'Criação de cenas e rotinas',
+    descricao: 'Programar comandos combinados na assistente de voz, como apagar as luzes e fechar as persianas simultaneamente ao falar “boa noite”. Sem essa programação, os dispositivos continuam funcionando normalmente pelo interruptor e pelo aplicativo; apenas os comandos combinados por voz não ficam configurados. O aparelho da assistente de voz deve ser adquirido pelo cliente.',
     imagem: 'assets/img/echo-dot.jpg',
     valor: 75,
     ajuda: 'alexa',
     rotuloSim: 'Quero a programação',
     rotuloNao: 'Não quero',
     blocos: [
-      { titulo: 'O que está incluído', itens: ['Integração dos dispositivos automatizados da unidade à assistente de voz', 'Criação de cenas e rotinas (ex.: “boa noite” apaga tudo e fecha as persianas)', 'Comandos de voz para luzes, tomadas e persianas automatizadas'] },
-      { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz (Amazon Echo) adquirido à parte pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta Amazon e aplicativo Alexa no celular'] },
-      { titulo: 'Limites da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita, depois que a rede Wi-Fi da unidade estiver instalada.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
+      { titulo: 'O que está incluído', itens: ['Integração dos dispositivos automatizados da unidade à assistente de voz', 'Criação de cenas e rotinas (ex.: “boa noite” apaga as luzes e fecha as persianas)', 'Comandos de voz para luzes, tomadas e persianas automatizadas'] },
+      { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz, o qual deve ser adquirido pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta no aplicativo da assistente de voz, no celular'] },
+      { titulo: 'Limites da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
     ]
   };
 
@@ -617,7 +618,7 @@
         ],
         resumo: 'Comanda pelo celular e por voz os aparelhos com controle remoto infravermelho, como ar-condicionado e TV.',
 
-        specs: [['Modelo', 'Nova Digital SRW-Mini (Controle Universal Mini IR White)'], ['Conectividade', 'Wi-Fi 2,4 GHz'], ['Alcance', 'Infravermelho até 10 m, sem obstáculos'], ['Alimentação', 'USB 5 V (qualquer carregador USB)'], ['Compatibilidade', 'TV, ar-condicionado e outros aparelhos com controle infravermelho; aprende os comandos do controle original'], ['Assistentes', 'Alexa e Google Assistente'], ['Instalação', 'Um por ambiente, com visão direta dos aparelhos']] }
+        specs: [['Modelo', 'Nova Digital SRW-Mini (Controle Universal Mini IR White)'], ['Conectividade', 'Wi-Fi 2,4 GHz'], ['Alcance', 'Infravermelho até 10 m, sem obstáculos'], ['Alimentação', 'USB 5 V (qualquer carregador USB)'], ['Compatibilidade', 'TV, ar-condicionado e outros aparelhos com controle infravermelho; aprende os comandos do controle original'], ['Assistentes de voz', 'Compatível com as principais assistentes de voz'], ['Instalação', 'Um por ambiente, com visão direta dos aparelhos']] }
     ]
   };
 
@@ -638,10 +639,11 @@
         video: { arquivo: 'assets/video/video-minipad.mp4', capa: 'assets/video/video-minipad.jpg', titulo: 'Minipad inteligente', inicio: 0 },
 
         escolha: {
-          titulo: 'Protocolo do minipad',
+          titulo: 'O minipad será usado como hub Zigbee?',
+          erro: 'Responda se o minipad será usado como hub Zigbee.',
           opcoes: [
-            { id: 'zigbee', rotulo: 'Zigbee', descricao: 'O minipad também funciona como hub Zigbee e dispensa o hub. Entra o acréscimo de 10% do protocolo Zigbee.' },
-            { id: 'wifi', rotulo: 'Somente Wi-Fi', descricao: 'Sem acréscimo. Dispositivos Zigbee continuam precisando do hub.' }
+            { id: 'zigbee', rotulo: 'Sim, usar como hub Zigbee', resumo: 'Usado como hub Zigbee', descricao: 'Dispensa o hub separado. Entra o acréscimo de 10% do protocolo Zigbee.' },
+            { id: 'wifi', rotulo: 'Não, somente Wi-Fi', resumo: 'Somente Wi-Fi (não usado como hub)', descricao: 'Sem acréscimo. Se houver dispositivos Zigbee, o hub continua necessário.' }
           ]
         },
         galeria: [
@@ -650,7 +652,7 @@
         ],
         resumo: 'Centraliza a gestão das automações: iluminação, equipamentos e cenas, em um único dispositivo.',
 
-        specs: [['Modelo', 'Nova Digital PCI01-Z (Painel Central Inteligente)'], ['Protocolos', 'Wi-Fi e Zigbee 3.0; também funciona como hub Zigbee (até 128 dispositivos)'], ['Assistente', 'Alexa integrada (dispensa dispositivo adicional); compatível com Google'], ['Alimentação', '100–240 V, ligado à rede elétrica com fase e neutro'], ['Dimensões', '72 × 127,3 × 36,5 mm'], ['Instalação', 'Caixa padrão 4x2 (ex.: próximo à porta de entrada)'], ['Compatibilidade', 'Locais com previsão para até 2 interruptores']]
+        specs: [['Modelo', 'Nova Digital PCI01-Z (Painel Central Inteligente)'], ['Protocolos', 'Wi-Fi e Zigbee 3.0; também funciona como hub Zigbee (até 128 dispositivos)'], ['Assistente de voz', 'Integrada ao painel (dispensa aparelho adicional)'], ['Alimentação', '100–240 V, ligado à rede elétrica com fase e neutro'], ['Dimensões', '72 × 127,3 × 36,5 mm'], ['Instalação', 'Caixa padrão 4x2 (ex.: próximo à porta de entrada)'], ['Compatibilidade', 'Locais com previsão para até 2 interruptores']]
       }
     ]
   };
@@ -658,7 +660,6 @@
   const COMO_FUNCIONA_AUTOMACAO = {
     tipo: 'explicacao',
     id: 'como-funciona-automacao',
-    video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 },
     aba: 'Como funciona',
     titulo: 'Como funciona a automação',
     descricao: 'São 4 serviços diferentes. Veja o que é cada um.'
@@ -669,36 +670,43 @@
     id: 'persianas',
     video: { arquivo: 'assets/video/video-persianas.mp4', capa: 'assets/video/video-persianas.jpg', titulo: 'Persianas motorizadas', inicio: 0 },
     titulo: 'Persiana automatizada integrada à janela',
-    descricao: 'As janelas dos dormitórios são entregues com a caixa para persiana. Como opcional, a construtora fornece e instala a persiana motorizada com interruptor inteligente, que funciona com ou sem automação: abre e fecha pelo interruptor, pelo aplicativo ou por voz.',
+    descricao: 'As janelas dos dormitórios são entregues com a caixa para persiana. Como opcional, a construtora oferece a persiana motorizada, que abre e fecha pelo interruptor, pelo aplicativo ou por voz. Ela é adquirida junto com um interruptor inteligente, pago à parte: o mínimo é a tecla Touch - Vidro (Wi-Fi).',
+
+    aviso: 'A persiana é instalada sempre com a tecla automatizada (interruptor inteligente). A construtora não trabalha com o acionador comum de persiana.',
     linhas: LINHAS_PERSIANA,
+    linhasPorAmbiente: true,
     pecaLinha: 'persiana',
 
+    adicionais: [
+      { id: 'controle-remoto', nome: 'Controle remoto', descricao: 'Controle remoto da persiana com módulo de cortina Wi-Fi', valor: 300, cheki: '2.3' }
+    ],
     ambientes: [
-      { id: 'q1', nome: 'Suíte', artigo: 'na', cheki: '2.2' },
-      { id: 'q2', nome: 'Quarto', artigo: 'no', cheki: '2.1' }
+      { id: 'q1', nome: 'Suíte', artigo: 'da', cheki: '2.2' },
+      { id: 'q2', nome: 'Quarto', artigo: 'do', cheki: '2.1' }
     ],
 
     modelos: [
       {
         id: 'persiana-integrada',
-        nome: 'Persiana motorizada com interruptor inteligente',
-        subtitulo: 'Instalada na caixa da esquadria · preparada para automação',
+        nome: 'Persiana motorizada',
+        subtitulo: 'Instalada na caixa da esquadria · com interruptor inteligente pago à parte',
         imagem: 'assets/img/persiana-integrada.jpg',
 
         galeria: [
-          { src: 'assets/img/persiana-integrada.jpg', legenda: 'Persiana motorizada instalada na caixa da esquadria, entregue em conjunto com o interruptor inteligente. Imagem ilustrativa.' },
+          { src: 'assets/img/persiana-integrada.jpg', legenda: 'Persiana motorizada instalada na caixa da esquadria. Imagem ilustrativa.' },
           { src: 'assets/img/persiana-caixa.jpg', legenda: 'Caixa para persiana integrada à esquadria, entregue pela construtora na janela dos dormitórios (padrão de entrega). A persiana motorizada é instalada dentro dessa caixa. Imagem ilustrativa.' },
-          { src: 'assets/img/jw-touch-branco-persiana.jpg', legenda: 'Interruptor de persiana da linha Touch - Vidro (JWCom), entregue em conjunto com a persiana. Nas demais linhas, a persiana usa o interruptor de 3 teclas da linha escolhida. Permite abrir e fechar a persiana pelo interruptor, pelo aplicativo ou por comando de voz.' },
+          { src: 'assets/img/jw-touch-branco-persiana.jpg', legenda: 'Interruptor de persiana da linha Touch - Vidro (JWCom), o padrão mínimo: adquirido junto com a persiana e pago à parte. Nas demais linhas, a persiana usa o interruptor de 3 teclas da linha escolhida. Abre e fecha a persiana pelo interruptor, pelo aplicativo ou por comando de voz.' },
         ],
-        resumo: 'Persiana motorizada instalada na caixa da esquadria, com interruptor inteligente. Abre e fecha pelo interruptor, pelo aplicativo ou por voz.',
+        resumo: 'Persiana motorizada instalada na caixa da esquadria. Abre e fecha pelo interruptor inteligente (pago à parte), pelo aplicativo ou por voz.',
         specs: [
           ['Padrão de entrega', 'Esquadria com caixa para persiana integrada'],
-          ['Persiana', 'Motorizada, fornecida e instalada pela construtora'],
-          ['Interruptor', 'Entregue junto, na linha e na cor escolhidas (valor conforme a linha): interruptor próprio de persiana na linha Touch - Vidro; interruptor de 3 teclas nas demais'],
+          ['Persiana', 'Motorizada, oferecida e instalada pela construtora'],
+          ['Interruptor', 'Pago à parte e adquirido junto com a persiana, na linha e na cor escolhidas para cada ambiente. Mínimo: Touch - Vidro (Wi-Fi). Interruptor próprio de persiana na Touch - Vidro; de 3 teclas nas demais'],
+          ['Acionador comum', 'Não disponível: a persiana é instalada sempre com a tecla automatizada'],
           ['Instalação e configuração', 'Incluídas no valor (configuração na rede na visita técnica gratuita)'],
           ['Automação', 'Já preparada; a persiana funciona com ou sem automação'],
           ['Acionamento', 'Interruptor, aplicativo ou comando de voz'],
-          ['Controle remoto', 'Não disponível: para abrir e fechar a distância, use o aplicativo no celular']
+          ['Controle remoto', 'Opcional, R$ 300,00 por ambiente (controle e módulo de cortina Wi-Fi)']
         ],
         observacoes: ['Para controlar a persiana por voz e incluí-la em cenas, veja a programação da assistente de voz na etapa de automação, mais adiante.'],
         valor: 2050,
@@ -724,9 +732,9 @@
     rotuloSim: 'Sim, deixei no contrapiso',
     rotuloNao: 'Não',
     info: [
-      'Sem o piso acabado, as portas dos quartos não são instaladas: a porta precisa de uma referência de nível do piso para ser instalada.',
+      'Os banheiros sempre recebem revestimento; por isso, as portas desses ambientes são instaladas normalmente.',
+      'Nos quartos, a instalação não pode ser feita sem o piso acabado, pois a porta precisa da referência de nível do piso.',
       'Por isso, você recebe um crédito de R$ 100,00 de mão de obra por porta de quarto que deixa de ser instalada.',
-      'Nos banheiros, a porta é instalada normalmente, pois eles sempre recebem revestimento.',
       'A instalação posterior das portas dos quartos fica por conta do cliente.'
     ]
   };
@@ -744,6 +752,18 @@
     info: ['A etapa de vasos sanitários mostra só o banheiro que continua no projeto.']
   };
 
+  const SACADA_INTEGRACAO = {
+    tipo: 'sacada-integracao',
+    id: 'sacada-integracao',
+    titulo: 'Integração da sacada',
+    pergunta: 'Na 1ª etapa de personalização, você fez a integração da sacada ao living?',
+    info: [
+      'Integração da sacada: retirada da esquadria entre a sacada e o living, feita na 1ª etapa por alguns clientes.',
+      'Com a integração, o fechamento da sacada é obrigatório; sem ela, o fechamento é opcional.',
+      'Se não lembrar, consulte o seu termo da 1ª etapa ou marque “Não tenho certeza”: a ZR3 confirma no cadastro.'
+    ]
+  };
+
   const CHURRASQUEIRA_REMOVIDA = {
     tipo: 'pergunta',
     id: 'churrasqueira-removida',
@@ -752,9 +772,9 @@
     rotuloSim: 'Sim, removi a churrasqueira',
     rotuloNao: 'Não',
     info: [
-      'Quem removeu a churrasqueira ganha de brinde a persiana da suíte, com o interruptor padrão.',
-      'Se você preferir outra linha de interruptor, paga só o valor adicional dele.',
-      'Sem a churrasqueira, a automação do exaustor central não é ofertada.'
+      'Sem a churrasqueira, a automação do exaustor central não é ofertada.',
+      'Brinde: quem removeu a churrasqueira ganha a persiana da suíte com o interruptor padrão.',
+      'Se preferir outra linha de interruptor, você paga só a diferença de valor entre as linhas.'
     ]
   };
 
@@ -766,7 +786,7 @@
     zigbee: { titulo: 'Zigbee', texto: 'Protocolo sem fio de baixo consumo, próprio para automação. Os dispositivos se conectam a um hub em vez de ao roteador, o que melhora a estabilidade em casas com muitas automações.' },
     wifi: { titulo: 'Wi-Fi', texto: 'Os dispositivos se conectam diretamente ao roteador da casa. Não precisam de hub, mas cada um ocupa uma conexão da rede.' },
     caixa: { titulo: 'Caixa 4x2 e 4x4', texto: 'São os tamanhos das caixas embutidas na parede (em polegadas). A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.' },
-    alexa: { titulo: 'Assistente de voz', texto: 'Assistente da Amazon (Alexa), presente nos aparelhos Echo, que obedece a comandos falados. O aparelho deve ser adquirido pelo cliente; a ZR3 oferece a programação.' },
+    alexa: { titulo: 'Assistente de voz', texto: 'Aparelho que obedece a comandos falados e controla os dispositivos inteligentes compatíveis. O aparelho deve ser adquirido pelo cliente; a ZR3 oferece a programação das cenas e rotinas.' },
     cub: { titulo: 'CUB', texto: 'Custo Unitário Básico da construção civil. No pagamento parcelado, as parcelas são reajustadas mensalmente pelo CUB.' },
     consulta: { titulo: 'Sob consulta', texto: 'O valor depende de uma definição da ZR3: por exemplo, quando você pediu para a equipe escolher o modelo, pediu ajuda para quantificar ou ainda falta confirmar uma informação da sua unidade. Sua escolha fica registrada e a ZR3 informa o valor na revisão do orçamento, antes da sua aprovação.' }
   };
@@ -814,7 +834,7 @@
         cenas: { rotulo: 'Cenas e rotinas', icone: 'cena' }
       },
       contato: {
-        equipe: 'Equipe de personalização ZR3',
+        equipe: 'equipe de personalização da ZR3',
         email: 'projetos@zr3empreendimentos.com.br',
         whatsapp: '554741010499',
 
@@ -833,6 +853,8 @@
       protocolos: {
         titulo: 'Wi-Fi ou Zigbee: os dois protocolos',
         texto: 'Cada linha de interruptor se comunica por um destes dois protocolos sem fio. A tag de cada linha mostra qual é.',
+
+        resumoCurto: 'Cada linha de interruptor usa Wi-Fi (conecta direto ao roteador, sem hub) ou Zigbee (conecta a um hub, mais estável com muitos dispositivos, com acréscimo de {pct}%). A tag de cada linha mostra qual é. Toque no (i) para ver o comparativo completo.',
         itens: [
           { id: 'wifi', nome: 'Wi-Fi', resumo: 'Cada dispositivo se conecta direto ao roteador da unidade.',
             pros: ['Não precisa de hub.', 'Sem acréscimo de valor, desde que nenhum item escolhido seja Zigbee.'],
@@ -845,22 +867,22 @@
 
       etapas: [
 
-        { id: 'anteriores', titulo: 'Etapas anteriores', curto: 'Anteriores', icone: 'lista', intro: 'Antes de começar, confirme o que você definiu nas etapas anteriores. As respostas ajustam os itens e os valores desta etapa.', secoes: [BANHEIRO_REMOVIDO, CHURRASQUEIRA_REMOVIDA, CONTRAPISO] },
+        { id: 'anteriores', titulo: 'Etapas anteriores', curto: 'Anteriores', icone: 'lista', intro: 'Antes de começar, confirme o que você definiu nas etapas anteriores. As respostas ajustam os itens e os valores desta etapa.', secoes: [BANHEIRO_REMOVIDO, CHURRASQUEIRA_REMOVIDA, CONTRAPISO, SACADA_INTEGRACAO] },
         { id: 'sacada', titulo: 'Fechamento de sacada', curto: 'Sacada', icone: 'sacada', intro: 'O modelo de fechamento de sacada é padronizado e definido pela construtora, para manter o padrão estético do empreendimento. Veja abaixo a condição para a sua unidade.', secoes: [SACADA] },
 
         { id: 'persianas', titulo: 'Persianas', curto: 'Persianas', icone: 'persiana', intro: 'Escolha, para cada ambiente, se deseja a persiana automatizada.', abas: 'sequencial', abasAmbientes: true, secoes: [PERSIANAS] },
-        { id: 'vasos', titulo: 'Vasos sanitários', curto: 'Vasos', icone: 'vaso', intro: 'Escolha o modelo de cada banheiro da sua unidade.', abas: 'sequencial', abaUnidade: 'banheiro', secoes: [VASO_SUITE, VASO_SOCIAL] },
+        { id: 'vasos', titulo: 'Vasos sanitários', curto: 'Vasos', icone: 'vaso', intro: 'Escolha o modelo de cada banheiro da sua unidade.', video: { arquivo: 'assets/video/video-vasos.mp4', capa: 'assets/video/video-vasos.jpg', titulo: 'Vasos sanitários', inicio: 0 }, abas: 'sequencial', abaUnidade: 'banheiro', secoes: [VASO_SUITE, VASO_SOCIAL] },
         { id: 'acabamentos', titulo: 'Interruptores e acabamentos', curto: 'Acabamentos', icone: 'interruptor', intro: 'Escolha o modelo de espelho dos interruptores e tomadas.', secoes: [ESPELHOS] },
-        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Contrate só o que fizer sentido para você. Cada item é independente.', imagem: 'assets/img/automacao-tablet.jpg', abas: 'sequencial',
+        { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Cada item é independente: monte a automação conforme a sua rotina, do básico ao completo.', video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
 
           servicos: {
             titulo: 'O que está incluído em cada serviço de automação',
             texto: 'São quatro serviços diferentes. Veja quem faz, quando e como cada um é cobrado:',
             itens: [
               { id: 'fiacao', semNota: true, icone: 'fio', curto: 'ZR3, na obra', titulo: 'Passagem de fiação (preparação elétrica)', texto: 'Deixar o neutro nas caixas de interruptor dos pontos de iluminação.', quem: 'ZR3, durante a obra.', custo: 'Item próprio desta etapa: preparação elétrica.' },
-              { id: 'instalacao', icone: 'ferramenta', curto: 'Incluída no produto', titulo: 'Instalação dos produtos', texto: 'Fixar e ligar a fechadura, os interruptores, as persianas e os demais itens contratados.', quem: 'ZR3, durante a obra.', custo: 'Incluída no valor de cada produto.' },
-              { id: 'configuracao', icone: 'wifi', curto: 'Incluída no produto', titulo: 'Configuração na rede', texto: 'Conectar cada dispositivo ao Wi-Fi (ou ao hub Zigbee) e ao aplicativo. Na fechadura, inclui o cadastro de usuários, digitais e senhas.', quem: 'Parceiro da ZR3, na visita técnica gratuita, depois que a rede Wi-Fi da unidade estiver instalada.', custo: 'Incluída no valor de cada produto.' },
-              { id: 'cenas', icone: 'cena', curto: 'Item à parte', titulo: 'Criação de cenas e rotinas', texto: 'Programar comandos combinados na assistente de voz, como “boa noite” apaga as luzes e fecha as persianas.', quem: 'Parceiro da ZR3, na visita técnica gratuita.', custo: 'Item próprio desta etapa: programação da assistente de voz.' }
+              { id: 'instalacao', semNota: true, icone: 'ferramenta', curto: 'Incluída no produto', titulo: 'Instalação dos produtos', texto: 'Fixar e ligar a fechadura, os interruptores, as persianas e os demais itens contratados.', quem: 'ZR3, durante a obra.', custo: 'Incluída no valor de cada produto.' },
+              { id: 'configuracao', icone: 'wifi', curto: 'Incluída no produto', titulo: 'Configuração na rede', texto: 'Conectar cada dispositivo ao Wi-Fi (ou ao hub Zigbee) e ao aplicativo. Na fechadura, inclui o cadastro de usuários, digitais, tags e senhas.', quem: 'Parceiro da ZR3, na visita técnica gratuita.', custo: 'Incluída no valor de cada produto.' },
+              { id: 'cenas', icone: 'cena', curto: 'Item à parte', titulo: 'Criação de cenas e rotinas', texto: 'Programar comandos combinados na assistente de voz, como apagar as luzes e fechar as persianas simultaneamente ao falar “boa noite”.', quem: 'Parceiro da ZR3, na visita técnica gratuita.', custo: 'Item próprio desta etapa: programação da assistente de voz.' }
             ],
             nota: 'Visitas adicionais podem ser combinadas diretamente com o fornecedor e podem ter cobrança extra.'
           },
@@ -932,7 +954,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.1',
+    versao: '1.2',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',
@@ -951,18 +973,30 @@
     },
     textos: {
       boasVindasTitulo: 'Bem-vindo à terceira etapa da personalização!',
-      boasVindasTexto: 'Nesta etapa você define acabamentos, fechamento de sacada e recursos de automação do seu apartamento. Conheça cada opção, veja fotos e especificações e registre suas preferências — no seu tempo, pelo celular ou computador.',
+      boasVindasTexto: 'Nesta etapa você define o fechamento de sacada, os acabamentos e os recursos de automação do seu apartamento. Conheça cada opção, veja fotos e especificações e registre as suas preferências.',
       avisoPdf: 'Este documento é um PRÉ-ORÇAMENTO e registra as preferências indicadas pelo cliente. O orçamento definitivo será enviado junto com o projeto para aprovação; somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura. Itens sob consulta dependem de orçamento e análise técnica.',
     },
 
     regrasGerais: [
-      'Esta plataforma gera um PRÉ-ORÇAMENTO com as suas preferências. O orçamento definitivo será enviado a você junto com o projeto, para aprovação. Somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura.',
-      'Confirme qual é a unidade que está sendo personalizada, pois os itens são disponibilizados de acordo com o final da unidade. Em caso de dúvida, consulte o seu contrato de compra e venda ou fale com a ZR3.',
-      'Para que a ZR3 receba as suas escolhas, é necessário enviar o PDF gerado ao final à equipe de personalização. Sem esse envio, as escolhas ficam salvas apenas neste dispositivo.',
-      'Se o cliente não retornar dentro do prazo, a unidade é executada no padrão da construtora e não pode mais ser personalizada.',
-      'Alterações solicitadas após a assinatura do aditivo estão sujeitas à taxa de revisão de projeto ({taxaRevisao}) e à análise de viabilidade da obra; se forem possíveis, podem gerar custos de retrabalho.',
-      'O atendimento desta etapa é feito online através do WhatsApp. Em caso de dúvidas, entre em contato conosco.'
+
+      'Pré-orçamento: esta plataforma gera um pré-orçamento com as suas preferências. O orçamento definitivo será enviado a você junto com o projeto, para aprovação. Somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura.',
+      'Unidade: confirme qual é a unidade que está sendo personalizada, pois os itens são disponibilizados de acordo com o final da unidade. Em caso de dúvida, consulte o seu contrato de compra e venda ou fale com a ZR3.',
+      'Envio: para que a ZR3 receba as suas escolhas, é necessário enviar o PDF gerado ao final à equipe de personalização. Sem esse envio, as escolhas ficam salvas apenas neste dispositivo.',
+      'Prazo: se o cliente não retornar dentro do prazo, o projeto no padrão da construtora é enviado à obra e não é possível garantir que as escolhas ainda possam ser atendidas.',
+      'Alterações após o aditivo: estão sujeitas à taxa de revisão de projeto ({taxaRevisao}) e à análise de viabilidade da obra; se forem possíveis, podem gerar custos de retrabalho.',
+      'Atendimento: é feito online, pelo WhatsApp. Em caso de dúvidas, fale conosco.'
     ],
+
+    pesquisa: {
+      titulo: 'Pesquisa de satisfação',
+      texto: 'Opcional. Leva poucos segundos e nos ajuda a melhorar as próximas etapas.',
+      perguntas: [
+        { id: 'geral', texto: 'De modo geral, como você avalia esta plataforma de personalização?' },
+        { id: 'etapa1', texto: 'Em comparação com a 1ª etapa de personalização, como você avalia esta etapa?' },
+        { id: 'etapa2', texto: 'Em comparação com a 2ª etapa de personalização, como você avalia esta etapa?' }
+      ],
+      rotulos: ['Muito ruim', 'Ruim', 'Regular', 'Boa', 'Muito boa']
+    },
     glossario: GLOSSARIO,
     empreendimentos: EMPREENDIMENTOS
   };

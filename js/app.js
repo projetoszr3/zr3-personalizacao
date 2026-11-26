@@ -31,6 +31,8 @@
     download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
     book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
     play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+    repetir: '<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     pausa: '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
     externo: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
     share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/>',
@@ -231,11 +233,20 @@
   }
 
   let toastT;
-  function toast(msg, tipo = '') {
+  function toast(msg, tipo = '', html = false) {
     $toast.className = 'show ' + tipo;
-    $toast.textContent = msg;
+    if (html) $toast.innerHTML = msg; else $toast.textContent = msg;
     clearTimeout(toastT);
-    toastT = setTimeout(() => ($toast.className = ''), Math.min(6000, 2600 + msg.length * 25));
+    toastT = setTimeout(() => ($toast.className = ''), Math.min(7000, 2600 + String(msg).replace(/<[^>]+>/g, '').length * 25));
+  }
+
+  function marcarComValor(e, alvo, resposta, texto) {
+    let antes = null; try { antes = E.calcular(S, e).total; } catch (err) {   }
+    marcarAuto(alvo, resposta);
+    let d = 0; try { if (antes != null) d = Math.round((E.calcular(S, e).total - antes) * 100) / 100; } catch (err) {   }
+    const pct = (((e.regras && e.regras.acrescimos) || []).find((x) => x.id === 'zigbee') || {}).percentual;
+    const comp = alvo.avisoAcrescimo && pct && alvo.valor != null && d > alvo.valor ? ` (${brl(alvo.valor)} do item + ${brl(d - alvo.valor)} do acréscimo de ${pct}% do Zigbee)` : '';
+    toast(`${esc(texto)}${d > 0 ? ` Acréscimo no total: <strong>+ ${brl(d)}</strong>${esc(comp)}.` : ''}`, '', true);
   }
   let modalVoltaFoco = null;
   function abrirModal(html, { titulo = '', largo = false } = {}) {
@@ -416,7 +427,7 @@
       ? `<div class="resume card">
           <div class="resume-tx"><strong>Você tem uma personalização em andamento</strong>
           <span>${S.cliente.nome ? esc(S.cliente.nome) + ' · ' : ''}${S.cliente.unidade ? 'Unidade ' + esc(S.cliente.unidade) + ' · ' : ''}salva neste dispositivo${S.atualizadoEm ? ' em ' + new Date(S.atualizadoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : ''}.</span></div>
-          <div class="resume-act"><button type="button" class="btn primary" data-act="retomar">Continuar de onde parei ${ic('right')}</button>
+          <div class="resume-act"><button type="button" class="btn primary so-desk" data-act="retomar">Continuar de onde parei ${ic('right')}</button>
           <button type="button" class="btn ghost" data-act="recomecar">${ic('reset')}<span>Começar do zero</span></button></div>
         </div>`
       : '';
@@ -452,12 +463,12 @@
       ${retomar}
       <div class="intro-grid">
         <section class="card video-card" aria-label="Vídeo explicativo"><div class="video" id="video-box">${video}</div>
-          ${youtubeId(e.videoUrl) ? `<a class="video-link" href="https://www.youtube.com/watch?v=${esc(youtubeId(e.videoUrl))}" target="_blank" rel="noopener">${ic('play')}<span>Não carregou? Assistir no YouTube</span></a>` : ''}
+          ${youtubeId(e.videoUrl) ? `<a class="video-link" href="https://www.youtube.com/watch?v=${esc(youtubeId(e.videoUrl))}" target="_blank" rel="noopener">${ic('externo')}<span>Não carregou? Assistir no YouTube</span></a><p class="ext-aviso">${ic('externo')} Abre em uma nova aba.</p>` : ''}
         </section>
         <section class="card como">
           <h2>Como funciona</h2>
           <ol class="como-list">
-            <li><span>1</span><div><strong>Identifique sua unidade</strong><p>Nome, unidade e contato.</p></div></li>
+            <li><span>1</span><div><strong>Identifique sua unidade</strong><p>Nome, apartamento e contato.</p></div></li>
             <li><span>2</span><div><strong>Conheça e escolha</strong><p>Fotos, especificações e valores de cada item. Toque em “Saiba mais” para os detalhes técnicos.</p></div></li>
             <li><span>3</span><div><strong>Revise tudo</strong><p>Volte a qualquer etapa e ajuste antes de finalizar.</p></div></li>
             <li><span>4</span><div><strong>Gere o PDF e envie à ZR3</strong><p>Encaminhe o documento à equipe de personalização. Só assim a ZR3 recebe as suas escolhas.</p></div></li>
@@ -465,13 +476,15 @@
           <p class="hint">${ic('nuvem')} Seu progresso é salvo automaticamente neste dispositivo.</p>
         </section>
       </div>
-      <section class="card regras-card regras-topo"><h2>${ic('info')} Instruções gerais</h2>${regrasHtml(true)}${linkWhats(e)}</section>
       <section class="card etapas-ov">
         <h2>O que você vai definir</h2>
-        <ul class="chips">${etapas.map((et) => `<li>${ic(et.icone)}<span>${esc(et.titulo)}</span></li>`).join('')}</ul>
+        <ul class="chips">${etapas.filter((et) => et.id !== 'anteriores').map((et) => `<li>${ic(et.icone)}<span>${esc(et.titulo)}</span></li>`).join('')}</ul>
       </section>
+      <section class="card regras-card regras-topo"><h2>${ic('info')} Instruções gerais</h2>${regrasHtml(true)}${linkWhats(e)}</section>
       <footer class="foot">${esc(CFG.empresa.nome)} · ${esc(CFG.empresa.endereco)} · ${esc(CFG.empresa.telefone)}<br><span class="muted">Versão ${esc(CFG.versao || '—')} · Tabela de valores ${esc(E.codigoTabela(CFG))}</span></footer>
-    </div>`;
+      <div class="cta-espaco"></div>
+    </div>
+    <div class="cta-fixa"><button type="button" class="btn primary lg" data-act="${temProgresso() ? 'retomar' : 'iniciar'}">${temProgresso() ? 'Continuar de onde parei' : 'Iniciar personalização'} ${ic('right')}</button></div>`;
   }
 
   function linkWhats(e) {
@@ -485,7 +498,12 @@
     const r = E.regrasGerais(CFG, emp());
     if (!r.length) return '';
     const [primeira, ...demais] = r;
-    return `${semTitulo ? '' : '<h4 class="regras-t">Instruções gerais</h4>'}<div class="regra-destaque">${ic('alerta')}<p>${esc(primeira)}</p></div>${demais.length ? `<ul class="bul regras">${demais.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}`;
+    return `${semTitulo ? '' : '<h4 class="regras-t">Instruções gerais</h4>'}<div class="regra-destaque">${ic('alerta')}<p>${temaNegrito(primeira)}</p></div>${demais.length ? `<ul class="bul regras">${demais.map((x) => `<li>${temaNegrito(x)}</li>`).join('')}</ul>` : ''}`;
+  }
+
+  function temaNegrito(x) {
+    const i = x.indexOf(': ');
+    return i > 0 && i < 32 ? `<strong>${esc(x.slice(0, i + 1))}</strong> ${esc(x.slice(i + 2))}` : esc(x);
   }
 
   const errDe = (campo) => erros.find((x) => x.campo === campo);
@@ -506,7 +524,7 @@
     if (!pz) return '';
     if (!pz.prazo) return `<p class="prazo-un">${ic('relogio')}<span>Prazo para envio: <strong>a definir pela ZR3</strong></span></p>`;
     return pz.vencido
-      ? `<p class="prazo-un vencido">${ic('alerta')}<span>O prazo para envio desta unidade terminou em <strong>${E.dataBr(pz.prazo)}</strong>. Você ainda pode enviar, mas a ZR3 vai avaliar se é possível atender as suas escolhas.</span></p>`
+      ? `<p class="prazo-un vencido">${ic('alerta')}<span>O prazo para envio desta unidade terminou em <strong>${E.dataBr(pz.prazo)}</strong>. Você ainda pode enviar, mas não é possível garantir que as suas escolhas ainda possam ser atendidas.</span></p>`
       : `<p class="prazo-un">${ic('relogio')}<span>Prazo para envio: <strong>até ${E.dataBr(pz.prazo)}</strong></span></p>`;
   }
 
@@ -515,7 +533,7 @@
     const pz = e.prazosPorPavimento || {};
     const uns = E.unidadesCadastradas(e).map((x) => x.unidade);
     const pavs = Object.keys(pz).map(Number).sort((x, y) => x - y);
-    abrirModal(`<p class="sec-desc">O prazo varia conforme o pavimento da unidade, acompanhando o avanço da obra. Depois do prazo, a ZR3 avalia caso a caso se ainda é possível atender as escolhas.</p>
+    abrirModal(`<p class="sec-desc">O prazo varia conforme o pavimento da unidade, acompanhando o avanço da obra. Depois do prazo, não é possível garantir que as escolhas ainda possam ser atendidas.</p>
       <table class="prazos"><thead><tr><th>Pavimento</th><th>Prazo para envio</th></tr></thead><tbody>${pavs.map((n) => {
         const lista = uns.filter((u) => E.pavimento(u) === n);
         const faixa = lista.length ? `${lista[0]} a ${lista[lista.length - 1]}` : '';
@@ -634,12 +652,11 @@
     const emps = CFG.empreendimentos.filter(E.ativo);
     return `
     <div class="page-head"><h1 tabindex="-1">Identificação do cliente e da unidade</h1>
-      <p>Esses dados identificam as suas escolhas no documento final. O final da unidade é identificado automaticamente pelo cadastro do empreendimento.</p></div>
+      <p>Esses dados identificam as suas escolhas no documento final. Basta o nome e o contato de um dos promitentes compradores.</p></div>
     <form class="card form" novalidate onsubmit="return false">
       <div class="f ${errDe('nome') ? 'has-error' : ''}">
         <label for="f-nome">Nome completo <span class="req" aria-hidden="true">*</span></label>
         <input id="f-nome" data-bind="nome" autocomplete="name" value="${esc(c.nome)}" ${aria('nome')} required>${fieldErr('nome')}
-        <p class="f-hint">Basta o nome e o contato de um dos promitentes compradores.</p>
       </div>
       <div class="f ${errDe('empreendimento') ? 'has-error' : ''}">
         <label for="f-emp">Empreendimento <span class="req" aria-hidden="true">*</span></label>
@@ -690,6 +707,7 @@
       <h1 tabindex="-1">${esc(et.titulo)}</h1>
       ${et.intro ? `<p>${esc(et.intro)}</p>` : ''}
     </div>
+    ${et.video && !captura ? `<div class="vid-bar">${videoBtn(et.video)}</div>` : ''}
     ${et.imagem && primeiraAba(et) ? `<div class="banner">${img(et.imagem, et.titulo)}</div>` : ''}
     ${et.servicos && primeiraAba(et) && !et.secoes.some((x) => x.tipo === 'explicacao') ? servicosHtml(et.servicos, !sequencial(et) || !concluida(et, tabsSeq(et)[0].id)) : ''}
     ${et.passos && primeiraAba(et) ? `<details class="card passos"><summary>${ic('lista')} ${esc(et.passos.titulo)}</summary>${et.passos.texto ? `<p>${esc(et.passos.texto)}</p>` : ''}<ol>${et.passos.itens.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : ''}
@@ -707,7 +725,7 @@
 
   function gruposEdit(s) {
     const es = E.esc(S, s.id);
-    if (!Array.isArray(es.grupos) || !es.grupos.length) es.grupos = E.gruposRaw(S, s).map((g) => ({ linha: g.linha, cor: g.cor, qtd: Object.assign({}, g.qtd || {}) }));
+    if (!Array.isArray(es.grupos) || !es.grupos.length) es.grupos = E.gruposRaw(S, s).map((g) => ({ linha: g.linha, cor: g.cor, qtd: Object.assign({}, g.qtd || {}), obs: g.obs || '' }));
     return es.grupos;
   }
   function sincronizarQtd(s) {
@@ -724,16 +742,20 @@
 
   function aplicarBrindes(e) {
     E.secoes(e, S).filter((x) => x.tipo === 'persianas' && x.linhas).forEach((sec) => {
-      const L = sec.linhas, es = E.esc(S, L.id);
-      const bi = (sec.ambientes || []).map((a) => E.brindeInterruptor(S, e, sec, a.id)).find(Boolean);
-      if (bi && !es.linha) {
-        const o = L.opcoes.find((x) => x.id === bi.linha && E.ativo(x));
-        if (o) { es.linha = o.id; es.cor = (o.cores || []).some((c) => c.id === bi.cor) ? bi.cor : ((o.cores || [])[0] || {}).id || null; es.tom = E.tomEscolhido(L, es); es.autoBrinde = true; }
-      } else if (!bi && es.autoBrinde) {
-        const pediu = (sec.ambientes || []).some((a) => (((S.escolhas[sec.id] || {}).amb || {})[a.id]) === 'sim');
-        if (!pediu) { delete es.linha; delete es.cor; delete es.tom; }
-        delete es.autoBrinde;
-      }
+      const L = sec.linhas;
+      (sec.linhasPorAmbiente ? sec.ambientes || [] : [null]).forEach((a) => {
+        const lid = E.chaveLinha(sec, a && a.id);
+        const bi = a ? E.brindeInterruptor(S, e, sec, a.id) : (sec.ambientes || []).map((x) => E.brindeInterruptor(S, e, sec, x.id)).find(Boolean);
+        const es = bi ? escLinha(lid, sec) : S.escolhas[lid];
+        if (bi && !es.linha) {
+          const o = L.opcoes.find((x) => x.id === bi.linha && E.ativo(x));
+          if (o) { es.linha = o.id; es.cor = (o.cores || []).some((c) => c.id === bi.cor) ? bi.cor : ((o.cores || [])[0] || {}).id || null; es.tom = E.tomEscolhido(L, es); es.autoBrinde = true; }
+        } else if (!bi && es && es.autoBrinde) {
+          const pediu = a ? (((S.escolhas[sec.id] || {}).amb || {})[a.id]) === 'sim' : (sec.ambientes || []).some((x) => (((S.escolhas[sec.id] || {}).amb || {})[x.id]) === 'sim');
+          if (!pediu) { delete es.linha; delete es.cor; delete es.tom; }
+          delete es.autoBrinde;
+        }
+      });
     });
   }
   function sincronizarMarcas(e) {
@@ -741,7 +763,7 @@
 
     ativas.filter((m) => m.opcao && m.opcao.exige).forEach((m) => {
       const alvo = E.secao(e, m.secao, S);
-      if (alvo && E.resposta(S, e, alvo) !== m.resposta) { marcarAuto(alvo, m.resposta); toast(`${alvo.aba || alvo.titulo} marcado: ${m.mensagem.charAt(0).toLowerCase() + m.mensagem.slice(1)}`); }
+      if (alvo && E.resposta(S, e, alvo) !== m.resposta) marcarComValor(e, alvo, m.resposta, `${alvo.aba || alvo.titulo} marcado: ${m.mensagem.charAt(0).toLowerCase() + m.mensagem.slice(1)}`);
     });
 
     E.secoes(e, S).forEach((sec) => {
@@ -757,6 +779,12 @@
     });
   }
 
+  const secDaLinha = (e, lid) => E.secoes(e, S).find((x) => x.linhas && (x.linhas.id === lid || (x.linhasPorAmbiente && lid.startsWith(x.linhas.id + '-'))));
+
+  function escLinha(lid, sl) {
+    if (!S.escolhas[lid] && sl && sl.linhasPorAmbiente && lid !== sl.linhas.id && S.escolhas[sl.linhas.id]) S.escolhas[lid] = JSON.parse(JSON.stringify(S.escolhas[sl.linhas.id]));
+    return E.esc(S, lid);
+  }
   const linhasAbertas = new Set();
   const gruposAbertos = new Set();
   const minPreco = (o) => { const v = Object.values(o.precos || {}).filter((x) => x != null); return v.length ? Math.min(...v) : null; };
@@ -774,11 +802,13 @@
     return { srcs, passos };
   }
   function fotoCard(L, o, cor, foto) {
-    if (!L.fotosEmLoop || !cor || captura) return `<span class="lc-img">${img(foto, o.nome)}</span>`;
+
+    const zoom = (src) => (captura || !src ? '' : ` data-act="zoom" data-src="${esc(src)}" data-legenda="${esc(o.nome + (o.fabricante ? ' · ' + o.fabricante : ''))}" role="button" aria-label="Ampliar a foto da linha ${esc(o.nome)}"`);
+    if (!L.fotosEmLoop || !cor || captura) return `<span class="lc-img"${zoom(foto)}>${img(foto, o.nome)}</span>`;
     const { srcs, passos } = passosLinha(L, o, cor);
-    if (srcs.length < 2) return `<span class="lc-img">${img(foto, o.nome)}</span>`;
+    if (srcs.length < 2) return `<span class="lc-img"${zoom(foto)}>${img(foto, o.nome)}</span>`;
     const [ia, ra, fa] = passos[passoFotos % passos.length];
-    return `<span class="lc-img loop ${fa ? 'falta' : ''}" data-passos="${esc(JSON.stringify(passos))}">${srcs.map((src, i) => `<span class="lc-sl ${i === ia ? 'on' : ''}">${img(src, o.nome)}</span>`).join('')}<em class="lc-rot">${esc(ra)}</em></span>`;
+    return `<span class="lc-img loop ${fa ? 'falta' : ''}"${zoom(srcs[ia])} data-passos="${esc(JSON.stringify(passos))}">${srcs.map((src, i) => `<span class="lc-sl ${i === ia ? 'on' : ''}">${img(src, o.nome)}</span>`).join('')}<em class="lc-rot">${esc(ra)}</em></span>`;
   }
 
   let loopFotos = null;
@@ -794,25 +824,30 @@
         b.querySelectorAll('.lc-sl').forEach((x, k) => x.classList.toggle('on', k === i));
         b.classList.toggle('falta', !!falta);
         const em = b.querySelector('.lc-rot'); if (em) em.textContent = rot;
+        const im = b.querySelectorAll('.lc-sl img')[i]; if (im && b.dataset.src) b.dataset.src = im.getAttribute('src');
       });
     }, 1800);
   }
 
-  function linhaEscolha(e, s, compacta, gi, info) {
+  function linhaEscolha(e, s, compacta, gi, info, ambId) {
     const grupo = gi != null && s._grupos ? s._grupos[gi] : null;
-    const L = s.linhas, ln = grupo ? grupo.ln : s._linha, es = grupo ? grupo.raw : (S.escolhas[L.id] || {});
+    const L = s.linhas, lid = E.chaveLinha(s, ambId);
+    const pa = ambId && s._porAmb ? s._porAmb[ambId] : null;
+    const ln = grupo ? grupo.ln : pa ? pa.ln : s._linha;
+    const es = grupo ? grupo.raw : (S.escolhas[lid] || (lid !== L.id ? S.escolhas[L.id] : null) || {});
     const dg = grupo ? ` data-s="${s.id}" data-g="${gi}"` : '';
     if (grupo && ln && ln.completa && !gruposAbertos.has(`${s.id}-${gi}`)) {
       return `<div class="linha-res" id="linha-${s.id}-g${gi}">${img(E.imgLinha(ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>Linha e cor ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong><span>${esc(ln.linha.subtitulo || '')}</span></div><button type="button" class="btn ghost sm" data-act="linha-trocar"${dg}>Trocar</button></div>`;
     }
-    if (compacta && ln && ln.completa && !linhasAbertas.has(L.id)) {
-      const precoLn = info || (s.tipo === 'persianas' ? `<span>${s._valorInterruptor == null ? 'Valor sob consulta' : '+ ' + brl(s._valorInterruptor) + ' por ambiente'}</span>` : `<span>${esc(L.resumoEscolha || 'Pode ser diferente dos outros interruptores da unidade.')}</span>`);
-      return `<div class="linha-res">${img(E.imgLinhaUso(L, ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>${esc(s.linhaRotulo || 'Interruptor da persiana')} ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong>${precoLn}</div><button type="button" class="btn ghost sm" data-act="linha-trocar" data-lid="${L.id}">Trocar</button></div>`;
+    if (compacta && ln && ln.completa && !linhasAbertas.has(lid)) {
+      const viA = pa ? pa.vi : s._valorInterruptor;
+      const precoLn = info || (s.tipo === 'persianas' ? `<span>${viA == null ? 'Valor sob consulta' : '+ ' + brl(viA) + ' por ambiente'}</span>` : `<span>${esc(L.resumoEscolha || 'Pode ser diferente dos outros interruptores da unidade.')}</span>`);
+      return `<div class="linha-res">${img(E.imgLinhaUso(L, ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>${esc(s.linhaRotulo || 'Interruptor da persiana')} ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong>${ln.linha.resumo ? `<span class="lr-desc">${esc(ln.linha.resumo)}</span>` : ''}${precoLn}</div><button type="button" class="btn ghost sm" data-act="linha-trocar" data-lid="${lid}">Trocar</button></div>`;
     }
 
     const tons = E.tons(L), tom = tons.length ? E.tomEscolhido(L, es) : null;
     const tomHtml = tons.length
-      ? `<div class="ltons"><span class="lstep">1. Escolha a cor</span><div class="chips" role="group" aria-label="Cor dos interruptores">${tons.map((t) => { const on = tom === t.id; return `<button type="button" class="chip tom ${on ? 'on' : ''}" aria-pressed="${on}" data-act="linha-tom" data-lid="${L.id}"${dg} data-t="${t.id}"><span class="sw" style="background:${esc(t.amostra || '#ccc')}"></span>${esc(t.nome)}</button>`; }).join('')}</div></div>`
+      ? `<div class="ltons"><span class="lstep">1. Escolha a cor</span><div class="chips" role="group" aria-label="Cor dos interruptores">${tons.map((t) => { const on = tom === t.id; return `<button type="button" class="chip tom ${on ? 'on' : ''}" aria-pressed="${on}" data-act="linha-tom" data-lid="${lid}"${dg} data-t="${t.id}"><span class="sw" style="background:${esc(t.amostra || '#ccc')}"></span>${esc(t.nome)}</button>`; }).join('')}</div></div>`
       : '';
     const cards = (L.opcoes || []).filter(E.ativo).filter((o) => !tons.length || (tom && E.coresNoTom(L, o, tom).length)).map((o) => {
       const sel = es.linha === o.id, min = minPreco(o);
@@ -823,7 +858,7 @@
       };
       const cs = tom ? E.coresNoTom(L, o, tom) : [];
       const foto = cs.length ? E.imgLinhaUso(L, { linha: o, cor: cs[0] }) : o.imagem;
-      return `<button type="button" class="lcard ${sel ? 'sel' : ''}" data-act="linha" data-lid="${L.id}"${dg} data-l="${o.id}" aria-pressed="${sel}">
+      return `<button type="button" class="lcard ${sel ? 'sel' : ''}" data-act="linha" data-lid="${lid}"${dg} data-l="${o.id}" aria-pressed="${sel}">
         ${fotoCard(L, o, cs[0], foto)}
         <span class="lc-tx"><span class="pcard-badges">${badges(o)}</span><strong>${esc(o.nome)}</strong><small>${esc([o.fabricante, o.subtitulo].filter(Boolean).join(' · '))}</small>${o.resumo ? `<span class="lc-desc">${esc(o.resumo)}</span>` : ''}${precoCard(o, min)}</span>
         <span class="sel-mark" aria-hidden="true">${sel ? ic('check') : ''}</span>
@@ -832,10 +867,10 @@
     const lsel = ln && ln.linha;
     const coresSel = lsel ? (tons.length ? E.coresNoTom(L, lsel, tom) : lsel.cores || []) : [];
     const cores = lsel && (tons.length ? coresSel.length > 1 : coresSel.length)
-      ? `<div class="lcores"><span>Cor da linha ${esc(lsel.nome)}:</span><div class="chips" role="group" aria-label="Cor">${coresSel.map((c) => { const on = es.cor === c.id; return `<button type="button" class="chip ${on ? 'on' : ''}" aria-pressed="${on}" data-act="linha-cor" data-lid="${L.id}"${dg} data-c="${c.id}">${on ? ic('check') : ''}${esc(c.nome)}</button>`; }).join('')}</div></div>`
+      ? `<div class="lcores"><span>Cor da linha ${esc(lsel.nome)}:</span><div class="chips" role="group" aria-label="Cor">${coresSel.map((c) => { const on = es.cor === c.id; return `<button type="button" class="chip ${on ? 'on' : ''}" aria-pressed="${on}" data-act="linha-cor" data-lid="${lid}"${dg} data-c="${c.id}">${on ? ic('check') : ''}${esc(c.nome)}</button>`; }).join('')}</div></div>`
       : '';
     const err = errDe(grupo ? `${s.id}-g${gi}` : s.id + '-linha');
-    return `<div class="card linha-box ${err ? 'has-error' : ''}" id="linha-${s.id}${grupo ? '-g' + gi : ''}">
+    return `<div class="card linha-box ${err ? 'has-error' : ''}" id="linha-${s.id}${grupo ? '-g' + gi : ambId ? '-' + ambId : ''}">
       ${grupo ? '' : `<h4 class="lb-t">${esc(L.titulo)}</h4><p class="muted">${esc(L.descricao)}</p>`}
       ${tomHtml}${tons.length ? `<div class="lstep-row"><span class="lstep">2. Escolha a linha</span><span class="lstep-acts">${emp().protocolos && tom ? `<button type="button" class="icon-btn sm" data-act="protocolos" aria-label="Wi-Fi ou Zigbee? Entenda a diferença" title="Wi-Fi ou Zigbee? Entenda a diferença">${ic('info')}</button>` : ''}${tom && cards.includes('lc-img loop') && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? `<button type="button" class="icon-btn sm" data-act="loop-pausa" aria-pressed="${fotosPausadas}" aria-label="${fotosPausadas ? 'Retomar as fotos' : 'Pausar as fotos'}" title="${fotosPausadas ? 'Retomar as fotos' : 'Pausar as fotos'}">${ic(fotosPausadas ? 'play' : 'pausa')}</button>` : ''}</span></div>` : ''}
       ${tons.length && !tom ? `<p class="note">${ic('info')} Escolha a cor para ver as linhas disponíveis nela.</p>` : `<div class="lgrid">${cards}</div>`}${cores}
@@ -856,7 +891,7 @@
   function tabsSeq(et) {
     if (et.abasAmbientes) {
       const s = et.secoes[0];
-      return (s.ambientes || []).map((a) => ({ id: s.id + '-' + a.id, rotulo: a.nome, titulo: `${s.abaTitulo || 'Persiana'} ${a.artigo || 'na'} ${a.nome.toLowerCase()}`, sec: s, amb: a, membros: [s], contem: (c) => c === s.id + '-' + a.id }));
+      return (s.ambientes || []).map((a) => ({ id: s.id + '-' + a.id, rotulo: a.nome, titulo: `${s.abaTitulo || 'Persiana'} ${a.artigo || 'da'} ${a.nome.toLowerCase()}`, sec: s, amb: a, membros: [s], contem: (c) => c === s.id + '-' + a.id }));
     }
     return abasDe(et).map((s) => { const membros = secoesDaAba(et, s); return { id: s.id, rotulo: s.aba || s.titulo, titulo: s.titulo, ajuda: s.ajuda, sec: s, membros, contem: (c) => membros.some((m) => casa(m.id)(c)) }; });
   }
@@ -935,15 +970,16 @@
   function resumoAbaSeqBase(e, et, t) {
     if (t.amb) {
       const s = t.sec, es = S.escolhas[s.id] || {}, r = E.ambResp(S, e, s, t.amb.id);
-      if (E.persianaBrinde(S, e, s.id, t.amb.id)) { const bi = E.brindeInterruptor(S, e, s, t.amb.id); return { ok: true, txt: bi && s._linha && s._linha.linha.id !== bi.linha ? 'Brinde · interruptor à parte' : 'Brinde · sem custo' }; }
+      const pa = s._porAmb ? s._porAmb[t.amb.id] : { ln: s._linha, vi: s._valorInterruptor };
+      if (E.persianaBrinde(S, e, s.id, t.amb.id)) { const bi = E.brindeInterruptor(S, e, s, t.amb.id); return { ok: true, txt: bi && pa.ln && pa.ln.linha.id !== bi.linha ? 'Brinde · interruptor à parte' : 'Brinde · sem custo' }; }
       if (r === 'nao') return { ok: true, txt: 'Não' };
       if (r !== 'sim') return { ok: false, txt: 'Responder' };
       const ms = (s.modelos || []).filter(E.ativo), m = ms.find((x) => x.id === (es.modelos || {})[t.amb.id]) || (ms.length === 1 ? ms[0] : null);
       if (!m) return { ok: false, txt: 'Escolher modelo' };
       let v = m.valor || 0;
       (s.adicionais || []).filter(E.ativo).forEach((ad) => { if (((es.adicionais || {})[ad.id] || {})[t.amb.id]) v += ad.valor || 0; });
-      const viC = s.linhas && s._valorInterruptor == null;
-      if (s.linhas) v += s._valorInterruptor || 0;
+      const viC = s.linhas && pa.vi == null;
+      if (s.linhas) v += pa.vi || 0;
       return { ok: !validarAbaSeq(e, t).length, txt: m.valor == null ? 'Sim · sob consulta' : 'Sim · + ' + brl(v) + (viC ? ' + consulta' : '') };
     }
     const membros = t.membros;
@@ -963,8 +999,9 @@
   function copiarHtml(et, s) {
     const origem = s.copiarDe && et.secoes.find((x) => x.id === s.copiarDe);
     const origemEsc = origem && (S.escolhas[origem.id] || {}).opcao;
-    return origem && origemEsc && origemEsc !== '__nenhuma'
-      ? `<button type="button" class="btn ghost sm copiar" data-act="copiar-aba" data-de="${origem.id}" data-para="${s.id}">${ic('check')}<span>Usar o mesmo modelo do ${esc((origem.aba || origem.titulo).toLowerCase())}</span></button>`
+    const origemOp = origem && (origem.opcoes || []).find((o) => o.id === origemEsc && E.ativo(o));
+    return origemOp
+      ? `<button type="button" class="btn ghost sm copiar" data-act="copiar-aba" data-de="${origem.id}" data-para="${s.id}">${ic('check')}<span>Repetir a escolha do ${esc((origem.aba || origem.titulo).toLowerCase())}: ${esc(origemOp.nome)}</span></button>`
       : '';
   }
   function abasSequenciais(e, et) {
@@ -982,9 +1019,7 @@
         <span class="tab-tx"><strong>${esc(t.rotulo)}</strong><small>${esc(r.txt)}</small></span>
       </button>`;
     }).join('');
-    const rodape = prox
-      ? `<button type="button" class="btn primary block next-aba" data-act="aba-prox"><span>Próximo: ${esc(prox.rotulo)}</span>${ic('right')}</button>`
-      : `<button type="button" class="btn primary block next-aba" data-act="avancar"><span>Concluir ${esc((et.curto || et.titulo).toLowerCase())} e continuar</span>${ic('right')}</button>`;
+    const rodape = '';
     const corpo = atual.amb
       ? `${persianaAmb(e, atual.sec, atual.amb, true)}${blocoAceite(atual.sec)}`
       : `${copiarHtml(et, atual.sec)}${secao(e, atual.sec)}${atual.membros.slice(1).map((m) => `<div class="sub-sec" id="sec-${m.id}"><h3 class="sub-title">${esc(m.titulo)} ${helpBtn(m.ajuda)}</h3>${secao(e, m)}</div>`).join('')}`;
@@ -1046,11 +1081,17 @@
 
     const base = v.youtube || emp().videoUrl || '', id = youtubeId(base), t = Math.max(0, Math.round(+v.inicio || 0));
     const yt = id ? `https://www.youtube.com/watch?v=${id}${t ? `&t=${t}s` : ''}` : /^https?:\/\//i.test(base) ? base : '';
-    abrirModal(`<figure class="vid-modal"><video src="${esc(v.arquivo)}"${v.capa ? ` poster="${esc(v.capa)}"` : ''} autoplay muted loop playsinline preload="auto" aria-label="${esc(v.titulo || 'Vídeo')}"></video></figure>
-      ${yt ? `<a class="btn primary vid-yt" href="${esc(yt)}" target="_blank" rel="noopener noreferrer">${ic('externo')}<span>${t ? 'Assistir este trecho no YouTube' : 'Assistir o vídeo completo no YouTube'}</span></a>`
+    abrirModal(`<figure class="vid-modal"><video src="${esc(v.arquivo)}"${v.capa ? ` poster="${esc(v.capa)}"` : ''} autoplay muted playsinline preload="auto" aria-label="${esc(v.titulo || 'Vídeo')}"></video><button type="button" class="vid-replay" data-act="video-replay" hidden aria-label="Assistir de novo">${ic('repetir')}<span>Assistir de novo</span></button></figure>
+      ${yt ? `<a class="btn primary vid-yt" href="${esc(yt)}" target="_blank" rel="noopener noreferrer">${ic('externo')}<span>${t ? 'Assistir este trecho no YouTube' : 'Assistir o vídeo completo no YouTube'}</span></a><p class="ext-aviso">${ic('externo')} Abre o YouTube em uma nova aba. A plataforma continua aberta nesta aba.</p>`
         : ''}`,
     { titulo: v.titulo || 'Vídeo', largo: true });
-    const el = $modal.querySelector('video'); if (el) { const p = el.play(); if (p && p.catch) p.catch(() => {}); }
+    const el = $modal.querySelector('video');
+    if (el) {
+      const rb = $modal.querySelector('.vid-replay');
+      el.addEventListener('ended', () => { if (rb) rb.hidden = false; });
+      el.addEventListener('play', () => { if (rb) rb.hidden = true; });
+      const p = el.play(); if (p && p.catch) p.catch(() => { if (rb) rb.hidden = false; });
+    }
   }
 
   const videoBar = (s) => (s && s.video && !captura ? `<div class="vid-bar">${videoBtn(s.video)}</div>` : '');
@@ -1069,6 +1110,7 @@
       case 'persianas': return secPersianas(e, s);
       case 'texto': return secTexto(e, s);
       case 'pergunta': return secPergunta(e, s);
+      case 'sacada-integracao': return secIntegracao(e, s);
       case 'explicacao': return secExplicacao(e, s);
       default: return '';
     }
@@ -1100,22 +1142,19 @@
       cond = `<div class="cond ok">
         <div class="cond-ic">${ic('check')}</div>
         <div><span class="badge b-ok">Incluso na sua unidade</span>
-        <h3>${sc.grupoNome && !sc.final ? 'O fechamento já está incluso' : 'O fechamento de sacada já está incluso'}</h3>
-        <p>${sc.grupoNome && !sc.final ? `Para a sua unidade, o fechamento` : `Para os finais ${lista(r.inclusoFinais)}, o fechamento de sacada`} faz parte do padrão de entrega e está contemplado no valor do imóvel. <strong>Não há custo adicional</strong> e você não precisa adquiri-lo separadamente.</p></div>
+        <h3>O fechamento de sacada já está incluso <button type="button" class="help" data-act="sacada-info" aria-label="Mais informações sobre o fechamento incluso">${ic('info')}</button></h3>
+        <p>Para ${sc.grupoNome && !sc.final ? 'a sua unidade' : 'o seu final'}, o fechamento de sacada faz parte do padrão de entrega. <strong>Não há custo adicional.</strong></p></div>
       </div>${ciente(sc.grupoNome && !sc.final ? 'Estou ciente de que o fechamento já está incluso na minha unidade.' : `Estou ciente de que o fechamento de sacada já está incluso na minha unidade (final ${f}).`)}`;
     } else if (sc.modo === 'naoConfigurado') {
       cond = `<div class="callout warn">${ic('alerta')}<p>Não há regra de fechamento de sacada cadastrada para ${sc.grupoNome ? esc(sc.grupoNome) : 'o final ' + f}. A equipe da ZR3 informará a condição da sua unidade.</p></div>${ciente('Estou ciente de que a condição será informada pela equipe da ZR3.')}`;
     } else {
 
+      const resp = { sim: 'fez a integração da sacada', nao: 'não fez a integração da sacada', naosei: 'não tem certeza se fez a integração da sacada' }[es.integracao];
       const pergunta = sc.fonte === 'cadastro'
         ? `<div class="callout info">${ic('info')}<p>Consta no cadastro da ZR3 que a unidade ${esc(S.cliente.unidade)} realizou a <strong>integração da sacada</strong> na 1ª etapa.</p></div>`
-        : `<div class="q ${errDe(s.id + '-integracao') ? 'has-error' : ''}">
-            <p class="q-t">Na 1ª etapa de personalização, você fez a <strong>integração da sacada</strong> ao living? ${helpBtn('integracao')}</p>
-            <div class="choices c3">
-              ${opcaoRadio('sacada-int', 'data-v="sim"', es.integracao === 'sim', 'Sim, fiz a integração')}
-              ${opcaoRadio('sacada-int', 'data-v="nao"', es.integracao === 'nao', 'Não fiz')}
-              ${r.permitirNaoSei ? opcaoRadio('sacada-int', 'data-v="naosei"', es.integracao === 'naosei', 'Não tenho certeza', 'A ZR3 confirma no cadastro') : ''}
-            </div></div>`;
+        : resp
+          ? `<div class="callout info">${ic('info')}<p>Em Etapas anteriores, você informou que <strong>${resp}</strong> na 1ª etapa.</p><button type="button" class="btn ghost sm" data-act="goto" data-tela="anteriores">Alterar resposta</button></div>`
+          : `<div class="callout warn">${ic('alerta')}<p>Responda, em Etapas anteriores, se a sua unidade fez a integração da sacada.</p><button type="button" class="btn ghost sm" data-act="goto" data-tela="anteriores">Ir para Etapas anteriores</button></div>`;
       let res = '';
       if (sc.modo === 'obrigatorio') {
         res = `<div class="cond warn"><div class="cond-ic">${ic('alerta')}</div><div>
@@ -1199,12 +1238,13 @@
     const nenhuma = s.nenhuma
       ? `<div class="none-opt">${opcaoRadio('pick', `data-s="${s.id}" data-o="__nenhuma"`, es.opcao === '__nenhuma', esc(s.nenhuma.rotulo), esc(s.nenhuma.descricao || ''))}</div>`
       : '';
-    return `${s.descricao ? `<p class="sec-desc">${esc(s.descricao)} ${helpBtn(s.ajuda)}</p>` : ''}
-      ${s.nota ? `<div class="callout info">${ic('info')}<p>${esc(s.nota)}</p></div>` : ''}
+    const comOrigem = s.descricaoComOrigem && s.copiarDe && E.secoes(e, S).some((x) => x.id === s.copiarDe);
+    return `${s.descricao ? `<p class="sec-desc">${esc(s.descricao)}${comOrigem ? ' ' + esc(s.descricaoComOrigem) : ''} ${helpBtn(s.ajuda)}</p>` : ''}
       <div class="legend"><span class="badge b-ok">Padrão</span> sem custo · <span class="price inline">+ R$</span> valor adicional${s.cobranca ? ` (${esc(s.cobranca)})` : ''}</div>
       ${erroSecao(s.id)}
       ${s.nenhuma && s.nenhuma.noTopo ? `<div class="none-top">${nenhuma}</div>` : ''}
-      <div class="pgrid ${s.nenhuma && s.nenhuma.noTopo && es.opcao === '__nenhuma' ? 'is-dim' : ''}">${cards}</div>${s.nenhuma && s.nenhuma.noTopo ? '' : nenhuma}`;
+      <div class="pgrid ${s.nenhuma && s.nenhuma.noTopo && es.opcao === '__nenhuma' ? 'is-dim' : ''}">${cards}</div>${s.nenhuma && s.nenhuma.noTopo ? '' : nenhuma}
+      ${s.nota ? `<div class="callout info">${ic('info')}<p>${esc(s.nota)}</p></div>` : ''}`;
   }
 
   function precoSecao(x) {
@@ -1214,8 +1254,9 @@
     return '';
   }
   function capaSecao(x) {
-    if (x.linhas) return ((x.linhas.opcoes || []).find(E.ativo) || {}).imagem;
+    if (x.capa) return x.capa;
     if (x.imagem) return x.imagem;
+    if (x.linhas) return ((x.linhas.opcoes || []).find(E.ativo) || {}).imagem;
     if (x.tipo === 'unica') { const o = (x.opcoes || []).find(E.ativo) || {}; return o.imagem || ((o.galeria || [])[0] || {}).src; }
     if (x.tipo === 'quantidades') return ((x.itens || []).find((it) => E.ativo(it) && it.imagem) || {}).imagem;
     return ((x.galeria || [])[0] || {}).src;
@@ -1228,7 +1269,7 @@
     abrirModal(`<div class="serv-modal">
       <div class="sm-head"><span class="st-ic lg">${ic(x.icone || 'info')}</span><p>${esc(x.texto)}</p></div>
       <dl class="tri-dl"><div><dt>Quem faz e quando</dt><dd>${esc(x.quem)}</dd></div><div><dt>Custo</dt><dd>${esc(x.custo)}</dd></div></dl>
-      ${secs.length ? `<h4>Itens em que este serviço se aplica</h4><p class="serv-aviso">${secs.length > 1 ? 'Cada item é contratado à parte, na própria aba. O serviço só vale para os itens que você contratar.' : 'Vale só se você contratar este item, na própria aba.'}</p><div class="serv-ops">${secs.map((y) => `<span class="serv-op">${img(capaSecao(y), y.nomeCurto || y.titulo)}<span>${esc(y.nomeCurto || y.titulo)}</span></span>`).join('')}</div>` : ''}
+      ${secs.length ? `<h4>Itens em que este serviço se aplica</h4><p class="serv-aviso">${secs.length > 1 ? 'Cada item é contratado à parte, na própria aba. Este serviço está incluído apenas nos itens que você contratar.' : 'Este serviço é contratado na própria aba do item.'}</p><div class="serv-ops">${secs.map((y) => `<span class="serv-op">${img(capaSecao(y), y.nomeCurto || y.titulo)}<span>${esc(y.nomeCurto || y.titulo)}</span></span>`).join('')}</div>` : ''}
       ${sv.nota && !x.semNota ? `<p class="note">${ic('info')} ${esc(sv.nota)}</p>` : ''}
     </div>`, { titulo: `${i + 1}. ${x.titulo}` });
   }
@@ -1239,7 +1280,9 @@
         <span class="exp-tx"><strong>${i + 1}. ${esc(x.titulo.replace(/ \(.*\)$/, ''))}</strong><small>${esc(x.texto)}</small><span class="exp-tag">${esc(x.curto || '')}</span></span>
         <span class="exp-go" aria-hidden="true">${ic('right')}</span>
       </button></li>`).join('')}</ol>` : '';
-    return `${s.descricao ? `<p class="sec-desc">${esc(s.descricao)}</p>` : ''}${servicos}${protocolosHtml(e)}`;
+    const P = e.protocolos;
+    const prot = P ? `<div class="prot prot-curto"><h3 class="prot-t">${esc(P.titulo)} <button type="button" class="help" data-act="protocolos" aria-label="Ver as vantagens e os pontos de atenção de cada protocolo">${ic('info')}</button></h3><p class="sec-desc">${esc((P.resumoCurto || P.texto || '').replace('{pct}', ((((e.regras && e.regras.acrescimos) || []).find((a) => a.id === 'zigbee')) || {}).percentual || ''))}</p></div>` : '';
+    return `${s.descricao ? `<p class="sec-desc">${esc(s.descricao)}</p>` : ''}${servicos}${prot}`;
   }
 
   function protocolosHtml(e, semTitulo) {
@@ -1256,11 +1299,12 @@
 
   function linhasQtd(e, s, itens, q, bloqueado, gi) {
     const dg = gi != null ? ` data-g="${gi}"` : '';
+    const curtos = (s.linhas && s.linhas.pecasCurtas) || {};
     return itens.filter(E.ativo).map((it) => {
       const n = q[it.id] || 0;
       return `<li class="qrow ${n ? 'on' : ''}">
           <button type="button" class="qimg" data-act="zoom" data-src="${esc(it.imagem)}" aria-label="Ampliar imagem de ${esc(it.nome)}">${img(it.imagem, it.nome)}</button>
-          <div class="qtx"><strong>${esc(it.nome)}</strong>${it.subtitulo ? `<small>${esc(it.subtitulo)}</small>` : ''}${it.resumo ? `<span class="qdesc">${esc(it.resumo)}</span>` : ''}<span class="qprice">${it.valor == null ? 'Valor sob consulta' : brl(it.valor) + ' / un.'} ${badges(it)}</span>${it.aviso ? `<span class="qaviso">${ic('alerta')} ${esc(it.aviso)}</span>` : ''}${it.specs ? `<button type="button" class="link qmais" data-act="saiba-q" data-s="${s.id}" data-o="${it.id}">Saiba mais</button>` : ''}${videoBtn(it.video, 'sm')}</div>
+          <div class="qtx"><strong>${esc(curtos[it.id] || it.nome)}</strong>${it.subtitulo ? `<small>${esc(it.subtitulo)}</small>` : ''}${it.resumo ? `<span class="qdesc">${esc(it.resumo)}</span>` : ''}<span class="qprice">${it.valor == null ? 'Valor sob consulta' : brl(it.valor) + ' / un.'} ${badges(it)}</span>${it.aviso ? `<span class="qaviso">${ic('alerta')} ${esc(it.aviso)}</span>` : ''}${it.specs ? `<button type="button" class="link qmais" data-act="saiba-q" data-s="${s.id}" data-o="${it.id}">Saiba mais</button>` : ''}${videoBtn(it.video, 'sm')}</div>
           <div class="stepper" role="group" aria-label="Quantidade de ${esc(it.nome)}">
             <button type="button" data-act="qty" data-s="${s.id}" data-i="${it.id}"${dg} data-d="-1" aria-label="Diminuir" ${n <= 0 ? 'disabled' : ''}>${ic('menos')}</button>
             <output aria-live="polite">${n}</output>
@@ -1281,27 +1325,32 @@
     const L = s.linhas;
     const cards = (L.opcoes || []).filter(E.ativo).map((o) => {
       const cor = (o.cores || [])[0], foto = cor ? E.imgLinha({ linha: o, cor }) : o.imagem;
-      return `<div class="lcard"><span class="lc-img">${img(foto, o.nome)}</span><span class="lc-tx"><span class="pcard-badges">${badges(o)}</span><strong>${esc(o.nome)}</strong><small>${esc([o.fabricante, o.subtitulo].filter(Boolean).join(' · '))}</small></span></div>`;
+      return `<div class="lcard"><span class="lc-img">${foto ? `<img src="${esc(foto)}" alt="${esc(o.nome)}" loading="eager" decoding="async">` : img(foto, o.nome)}</span><span class="lc-tx"><span class="pcard-badges">${badges(o)}</span><strong>${esc(o.nome)}</strong><small>${esc([o.fabricante, o.subtitulo].filter(Boolean).join(' · '))}</small></span></div>`;
     }).join('');
     return `<div class="card linha-box is-off" aria-disabled="true"><h4 class="lb-t">${esc(L.titulo)}</h4><p class="muted">As linhas ficam disponíveis depois de marcar a ${esc(((E.secao(emp(), s.requer.secao, S) || {}).titulo || 'seção exigida').toLowerCase())}.</p><div class="lgrid">${cards}</div></div>`;
   }
   function gruposHtml(e, s, bloqueado) {
     if (bloqueado) return linhasTravadas(s);
     const gs = s._grupos, multi = gs.length > 1;
+    const aux = !!(S.escolhas[s.id] || {}).auxilio;
     const blocos = gs.map((g) => {
       const ok = g.ln && g.ln.completa;
+      const pecas = aux ? '' : ok
+        ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(g.ln))}</h4><ul class="qlist card qcompacta">${linhasQtd(e, s, g.itens, g.raw.qtd || {}, false, g.i)}</ul>
+           <label class="g-obs"><span>Local ou circuito <small>(opcional)</small></span><input type="text" maxlength="160" data-gobs="${g.i}" data-s="${s.id}" value="${esc(g.raw.obs || '')}" placeholder="Ex.: luzes do living e da sacada"></label>`
+        : `<p class="note">${ic('info')} Escolha a cor e a linha para ver as peças e os valores.</p>`;
       return `<div class="lgrupo ${multi ? 'multi' : ''}">
-        ${multi ? `<div class="lg-head"><strong>Linha ${g.i + 1}${g.ln ? ' · ' + esc(E.nomeLinha(g.ln)) : ''}</strong><button type="button" class="btn ghost sm" data-act="grupo-del" data-s="${s.id}" data-g="${g.i}">${ic('x')}<span>Remover</span></button></div>` : ''}
+        ${multi ? `<div class="lg-head"><strong>${aux ? 'Preferência' : 'Linha'} ${g.i + 1}${g.ln ? ' · ' + esc(E.nomeLinha(g.ln)) : ''}</strong><button type="button" class="btn ghost sm" data-act="grupo-del" data-s="${s.id}" data-g="${g.i}">${ic('x')}<span>Remover</span></button></div>` : ''}
         ${linhaEscolha(e, s, false, g.i)}
-        ${ok ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(g.ln))}</h4><ul class="qlist card">${linhasQtd(e, s, g.itens, g.raw.qtd || {}, false, g.i)}</ul>` : `<p class="note">${ic('info')} Escolha a cor e a linha para ver as peças e os valores.</p>`}
+        ${pecas}
       </div>`;
     }).join('');
     const ultimo = gs[gs.length - 1];
-    const podeAdd = ultimo.ln && ultimo.ln.completa && Object.values(ultimo.raw.qtd || {}).some((n) => n > 0);
-    return `<div class="card linha-box lb-intro"><h4 class="lb-t">${esc(s.linhas.titulo)}</h4><p class="muted">${esc(s.linhas.descricao)}</p></div>
+    const podeAdd = ultimo.ln && ultimo.ln.completa && (aux || Object.values(ultimo.raw.qtd || {}).some((n) => n > 0));
+    return `<div class="card linha-box lb-intro"><h4 class="lb-t">${aux ? 'Linha de preferência dos interruptores' : esc(s.linhas.titulo)}</h4><p class="muted">${aux ? 'Escolha a cor e a linha que você prefere. A equipe da ZR3 faz a contagem das peças e informa os valores na revisão do orçamento.' : esc(s.linhas.descricao)}</p></div>
       ${blocos}
-      <button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}" ${podeAdd ? '' : 'disabled'}>${ic('mais')}<span>Adicionar outra linha</span></button>
-      ${podeAdd ? '' : `<p class="muted add-linha-dica">Para mesclar linhas, escolha as peças desta linha e depois adicione outra.</p>`}`;
+      <button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}" ${podeAdd ? '' : 'disabled'}>${ic('mais')}<span>${aux ? 'Adicionar outra linha de preferência' : 'Adicionar outra linha'}</span></button>
+      ${podeAdd ? '' : `<p class="muted add-linha-dica">${aux ? 'Escolha a cor e a linha desta preferência para adicionar outra.' : 'Para mesclar linhas, escolha as peças desta linha e depois adicione outra.'}</p>`}`;
   }
 
   function secQuantidades(e, s) {
@@ -1345,11 +1394,12 @@
     const nao = bloqueado ? '' : `<div class="choices qnao ${errDe(s.id) ? 'has-error' : ''}">${opcaoRadio('qty-nenhum', `data-s="${s.id}"`, !!es.nenhum && !algum && !es.auxilio, esc(s.rotuloNenhum || 'Não quero'), 'Nenhum item desta seção')}</div>${errDe(s.id) ? `<p class="field-error">${esc(errDe(s.id).msg)}</p>` : ''}`;
     return `${s.descricao ? `<p class="sec-desc">${esc(s.descricao)}</p>` : ''}
       ${aviso}
+      ${s.nota && !bloqueado ? `<div class="callout info">${ic('info')}<p>${esc(s.nota)}</p></div>` : ''}
+      ${s._grupos ? aux : ''}
       ${s._grupos ? gruposHtml(e, s, bloqueado) : `${comLinha ? linhaEscolha(e, s) : ''}
       ${linhaOk || bloqueado ? `${comLinha ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(s._linha))}</h4>` : ''}<ul class="qlist card ${bloqueado ? 'is-locked' : ''}">${rows}</ul>` : `<p class="note">${ic('info')} Escolha a cor e a linha para ver as peças e os valores.</p>`}`}
-      ${aux}
+      ${s._grupos ? '' : aux}
       ${nao}
-      ${s.nota ? `<p class="note">${ic('info')} ${esc(s.nota)}</p>` : ''}
       <p class="subtotal">Subtotal: <strong>${brl(sub)}</strong>${consulta ? ' + itens sob consulta' : ''}</p>`;
   }
 
@@ -1449,45 +1499,49 @@
     const selM = (es.modelos || {})[a.id] || (modelos.length === 1 ? m0.id : '');
     const mSel = modelos.find((m) => m.id === selM) || m0;
     const valor = mSel && mSel.valor;
-    const vi = s.linhas ? s._valorInterruptor : 0;
+    const pa = s._porAmb ? s._porAmb[a.id] : { ln: s._linha, vi: s._valorInterruptor };
+    const vi = s.linhas ? pa.vi : 0;
     const precoTxt = valor == null ? 'Valor sob consulta' : '+ ' + brl(valor + (vi || 0)) + (s.linhas && vi == null ? ' + interruptor (conforme a linha)' : '');
 
     const bInt = brinde ? E.brindeInterruptor(S, e, s, a.id) : null;
     const bLinha = bInt ? s.linhas.opcoes.find((x) => x.id === bInt.linha) : null;
-    const ehPadrao = !!(bInt && s._linha && s._linha.linha.id === bInt.linha);
-    const infoLinha = bInt ? (ehPadrao ? '<span>Interruptor padrão do brinde: sem custo</span>' : '<span>Linha diferente da padrão do brinde: valor adicional sob consulta</span>') : null;
+    const ehPadrao = !!(bInt && pa.ln && pa.ln.linha.id === bInt.linha);
+    const pPadrao = bLinha ? (bLinha.precos || {})[s.pecaLinha || 'persiana'] : null;
+    const dif = bInt && !ehPadrao && vi != null && pPadrao != null ? (bInt.cobranca === 'integral' ? vi : Math.max(0, vi - pPadrao)) : null;
+    const infoLinha = bInt ? (ehPadrao ? '<span>Interruptor padrão do brinde: sem custo</span>' : `<span>${dif == null ? 'Linha diferente da padrão do brinde: valor adicional a confirmar' : `Linha diferente da padrão do brinde: + ${brl(dif)} (diferença)`}</span>`) : null;
     const temErro = errDe(s.id + '-' + a.id);
 
     const ia = (s.ambientes || []).findIndex((x) => x.id === a.id), ant = ia > 0 ? s.ambientes[ia - 1] : null;
     const rAnt = ant && E.ambResp(S, e, s, ant.id);
     const adsAnt = ant ? (s.adicionais || []).filter((ad) => E.ativo(ad) && ((es.adicionais || {})[ad.id] || {})[ant.id]).map((ad) => ad.nome.toLowerCase()) : [];
+    const lnAnt = ant && s._porAmb ? s._porAmb[ant.id].ln : null;
     const repetir = rAnt && !brinde
-      ? `<button type="button" class="btn ghost sm copiar" data-act="pers-repetir" data-s="${s.id}" data-de="${ant.id}" data-para="${a.id}">${ic('check')}<span>Repetir a escolha ${ant.artigo === 'no' ? 'do' : 'da'} ${esc(ant.nome.toLowerCase())}: ${rAnt === 'sim' ? 'quero persiana' + (adsAnt.length ? ' + ' + esc(adsAnt.join(', ')) : '') : 'não quero'}</span></button>`
+      ? `<button type="button" class="btn ghost sm copiar" data-act="pers-repetir" data-s="${s.id}" data-de="${ant.id}" data-para="${a.id}">${ic('check')}<span>Repetir a escolha ${ant.artigo || 'da'} ${esc(ant.nome.toLowerCase())}: ${rAnt === 'sim' ? 'persiana' + (lnAnt && lnAnt.completa ? ' + interruptor ' + esc(lnAnt.linha.nome) : '') + (adsAnt.length ? ' + ' + esc(adsAnt.join(', ')) : '') : 'não quero'}</span></button>`
       : '';
     const modelo = r === 'sim' && modelos.length > 1
       ? `<div class="f"><label for="pm-${a.id}">Modelo</label><select id="pm-${a.id}" data-act="pers-modelo" data-s="${s.id}" data-a="${a.id}"><option value="">Selecione</option>${modelos.map((m) => `<option value="${m.id}" ${selM === m.id ? 'selected' : ''}>${esc(m.nome)} – ${m.valor == null ? 'sob consulta' : brl(m.valor)}</option>`).join('')}</select></div>`
       : '';
     const ads = r === 'sim'
-      ? (s.adicionais || []).filter(E.ativo).map((ad) => `<label class="check"><input type="checkbox" data-act="pers-add" data-s="${s.id}" data-ad="${ad.id}" data-a="${a.id}" ${((es.adicionais || {})[ad.id] || {})[a.id] ? 'checked' : ''}><span>${esc(ad.nome)} <span class="muted">(${ad.valor == null ? 'sob consulta' : '+ ' + brl(ad.valor)})</span></span></label>`).join('')
+      ? (s.adicionais || []).filter(E.ativo).map((ad) => `<label class="check"><input type="checkbox" data-act="pers-add" data-s="${s.id}" data-ad="${ad.id}" data-a="${a.id}" ${((es.adicionais || {})[ad.id] || {})[a.id] ? 'checked' : ''}><span>${esc(ad.nome)} <span class="muted">(${ad.valor == null ? 'sob consulta' : '+ ' + brl(ad.valor)})</span>${ad.descricao ? `<small class="muted d-block">${esc(ad.descricao)}</small>` : ''}</span></label>`).join('')
       : '';
     return `<div class="card amb ${r === 'sim' ? 'on' : ''} ${temErro ? 'has-error' : ''}" id="amb-${a.id}">
         ${semTitulo ? '' : `<h4>${ic('persiana')} ${esc(a.nome)}</h4>`}
         ${repetir}
         ${brinde
-          ? `<div class="locked">${ic('check')}<div><strong>Persiana ${a.artigo || 'na'} ${esc(a.nome.toLowerCase())} incluída como brinde</strong><p>${esc(brinde.detalhe)} ${(es.amb || {})[a.id] === 'sim' ? 'Como você já tinha escolhido esta persiana, o valor dela será abatido no resumo.' : 'Ela foi incluída automaticamente, sem custo.'}${bInt ? ` Vem com o interruptor padrão${bLinha ? ` (${esc(bLinha.nome)} ${esc(bLinha.fabricante || '')})` : ''}. Se você trocar a linha do interruptor, paga só o valor adicional dele.` : ''}</p></div></div>`
+          ? `<div class="locked">${ic('check')}<div><strong>Persiana ${a.artigo || 'da'} ${esc(a.nome.toLowerCase())} incluída como brinde</strong><p>${esc(brinde.detalhe)} ${(es.amb || {})[a.id] === 'sim' ? 'Como você já tinha escolhido esta persiana, o valor dela será abatido no resumo.' : 'Ela foi incluída automaticamente, sem custo.'}${bInt ? ` Vem com o interruptor padrão${bLinha ? ` (${esc(bLinha.nome)} ${esc(bLinha.fabricante || '')})` : ''}. Se você trocar a linha do interruptor, paga só a diferença de valor.` : ''}</p></div></div>`
           : `<div class="choices c2">
-          ${opcaoRadio('pers-amb', `data-s="${s.id}" data-a="${a.id}" data-v="sim"`, r === 'sim', `Quero persiana ${a.artigo || 'na'} ${esc(a.nome.toLowerCase())}`, precoTxt)}
+          ${opcaoRadio('pers-amb', `data-s="${s.id}" data-a="${a.id}" data-v="sim"`, r === 'sim', `Quero persiana ${a.artigo || 'da'} ${esc(a.nome.toLowerCase())}`, precoTxt)}
           ${opcaoRadio('pers-amb', `data-s="${s.id}" data-a="${a.id}" data-v="nao"`, r === 'nao', 'Não quero', 'Sem custo')}
         </div>`}
         ${modelo}
-        ${r === 'sim' && s.linhas ? linhaEscolha(e, s, true, null, infoLinha) : ''}
+        ${r === 'sim' && s.linhas ? linhaEscolha(e, s, true, null, infoLinha, a.id) : ''}
         ${ads}
         ${temErro ? `<p class="field-error">${esc(temErro.msg)}</p>` : ''}
       </div>`;
   }
   function persianasTopo(e, s) {
     const modelos = (s.modelos || []).filter(E.ativo);
-    return `<p class="sec-desc">${esc(s.descricao)}</p>
+    return `<p class="sec-desc">${esc(s.descricao)}</p>${s.aviso ? `<div class="callout info">${ic('info')}<p>${esc(s.aviso)}</p></div>` : ''}
       <div class="pgrid single">${modelos
         .map((m) => `<article class="pcard static">
           <div class="pcard-main">${capaGaleria(m)}
@@ -1510,27 +1564,43 @@
     return `<span class="figs">${gal.map(bt).join('')}</span>`;
   }
 
+  function secIntegracao(e, s) {
+    const es = S.escolhas.sacada || {};
+    const ss = E.secoes(e, S).find((x) => x.tipo === 'sacada');
+    const r = (ss && ss.regras) || {};
+    return `<div class="card perg ${errDe(s.id) ? 'has-error' : ''}">
+        <p class="perg-q">${esc(s.pergunta)} ${infoBtn(s)}</p>
+        <div class="choices c3">
+          ${opcaoRadio('sacada-int', 'data-v="sim"', es.integracao === 'sim', 'Sim, fiz a integração')}
+          ${opcaoRadio('sacada-int', 'data-v="nao"', es.integracao === 'nao', 'Não fiz')}
+          ${r.permitirNaoSei ? opcaoRadio('sacada-int', 'data-v="naosei"', es.integracao === 'naosei', 'Não tenho certeza', 'A ZR3 confirma no cadastro') : ''}
+        </div>
+        ${errDe(s.id) ? `<p class="field-error">${esc(errDe(s.id).msg)}</p>` : ''}
+      </div>`;
+  }
+
+  const infoBtn = (s) => ((s.info || []).length ? `<button type="button" class="help" data-act="info-perg" data-s="${s.id}" aria-label="Mais informações sobre ${esc(s.titulo)}">${ic('info')}</button>` : '');
+
   function secPergunta(e, s) {
     const r = (S.escolhas[s.id] || {}).resposta || null;
     const cred = (e.creditos || []).find((c) => c.quando && c.quando.secao === s.id);
     const brinde = (e.brindes || []).find((b) => b.quando && b.quando.secao === s.id);
     let efeito = '';
     if (r === 'sim' && cred) {
-      efeito = `<div class="callout info">${ic('check')}<p><strong>Crédito de ${brl(-cred.valorPorPorta)} por porta.</strong></p></div>`;
+      efeito = `<div class="callout info">${ic('check')}<p><strong>Crédito da mão de obra:</strong> ${brl(-cred.valorPorPorta)} por porta entregue embalada (sem instalação).</p></div>`;
     }
     if (r === 'sim' && brinde) {
       const ps = E.secao(e, brinde.secao, S);
       const amb = ps && (ps.ambientes || []).find((x) => x.id === brinde.ambiente);
       const jaTinha = ((S.escolhas[brinde.secao] || {}).amb || {})[brinde.ambiente] === 'sim';
       const visitou = ps && ps._etapa && S.visitadas[ps._etapa.id];
-      efeito = ps && amb ? `<div class="callout info">${ic('check')}<p><strong>${esc(brinde.titulo)}.</strong> ${jaTinha ? `Você já tinha escolhido a persiana ${amb.artigo || 'na'} ${esc(amb.nome.toLowerCase())}: o valor dela será abatido no resumo.` : `A persiana ${amb.artigo || 'na'} ${esc(amb.nome.toLowerCase())} já fica incluída na etapa Persianas, sem custo${brinde.interruptor ? ', com o interruptor padrão' : ''}.`}</p>${visitou ? `<button type="button" class="btn ghost sm" data-act="goto" data-tela="${ps._etapa.id}">${ic('persiana')}<span>Ver persianas</span></button>` : ''}</div>` : '';
+      efeito = ps && amb ? `<div class="callout info">${ic('check')}<p><strong>Brinde:</strong> ${jaTinha ? `como você já tinha escolhido a persiana ${amb.artigo || 'da'} ${esc(amb.nome.toLowerCase())}, o valor dela será abatido no resumo.` : `a persiana ${amb.artigo || 'da'} ${esc(amb.nome.toLowerCase())} já fica incluída na etapa Persianas, sem custo${brinde.interruptor ? ', com o interruptor padrão' : ''}.`}</p>${visitou ? `<button type="button" class="btn ghost sm" data-act="goto" data-tela="${ps._etapa.id}">${ic('persiana')}<span>Ver persianas</span></button>` : ''}</div>` : '';
     }
     return `<div class="card perg ${errDe(s.id) ? 'has-error' : ''}">
-        <p class="perg-q">${esc(s.pergunta || s.titulo)}</p>
+        <p class="perg-q">${esc(s.pergunta || s.titulo)} ${infoBtn(s)}</p>
         <div class="choices ${s.opcoes ? '' : 'c2'}">
           ${(s.opcoes || [{ id: 'sim', rotulo: s.rotuloSim || 'Sim' }, { id: 'nao', rotulo: s.rotuloNao || 'Não' }]).map((o) => opcaoRadio('resp', `data-s="${s.id}" data-v="${o.id}"`, r === o.id, esc(o.rotulo))).join('')}
         </div>
-        ${(s.info || []).length ? `<ul class="perg-info">${s.info.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
         ${errDe(s.id) ? `<p class="field-error">${esc(errDe(s.id).msg)}</p>` : ''}
       </div>
       ${efeito}`;
@@ -1595,43 +1665,53 @@
     ${calc.observacoes ? `<section class="card rgroup"><div class="rgroup-h"><h2>${ic('lista')} Observações</h2></div><p class="obs">${esc(calc.observacoes)}</p></section>` : ''}
     ${E.aceites(S, e).length ? `<section class="card rgroup"><div class="rgroup-h"><h2>${ic('resumo')} Termos aceitos</h2></div>${E.aceites(S, e).map((a) => `<div class="termo ok"><h4>${ic('check')} ${esc(a.titulo)}</h4><p>${esc(a.texto)}</p></div>`).join('')}</section>` : ''}
     <section class="card totals">
-      <div class="t-row big"><span>Total estimado (pré-orçamento)</span><strong>${brl(calc.total)}</strong></div>
-      ${calc.aVista != null && calc.total > 0 ? `<div class="t-row"><span>Estimativa à vista (${pg.descontoAVistaPct}% de desconto)</span><strong>${brl(calc.aVista)}</strong></div>` : ''}
+      <div class="t-row big"><span>Total estimado <span class="t-sub">(pré-orçamento)</span></span><strong>${brl(calc.total)}</strong></div>
+      ${calc.aVista != null && calc.total > 0 ? `<div class="t-row"><span>Estimativa à vista <span class="t-sub">(${pg.descontoAVistaPct}% de desconto)</span></span><strong>${brl(calc.aVista)}</strong></div>` : ''}
       ${calc.consulta.length ? `<div class="t-row"><span>Itens que dependem de orçamento ou confirmação ${helpBtn('consulta')}</span><strong>${calc.consulta.length}</strong></div><ul class="t-list">${calc.consulta.map((l) => `<li>${esc(l.item)}</li>`).join('')}</ul>` : ''}
       ${pg.texto && calc.total > 0 ? `<p class="hint">${esc(pg.texto)} ${helpBtn('cub')}</p>` : ''}
     </section>
+    ${pesquisaHtml()}
     <section class="card finalize">
       <label class="check big"><input type="checkbox" data-act="confirmar" ${S.confirmado ? 'checked' : ''}>
         <span>Revisei todas as opções e confirmo que este resumo representa as minhas preferências para a 3ª etapa de personalização.</span></label>
       <div class="callout warn">${ic('alerta')}<p><strong>Importante:</strong> depois de gerar o PDF, envie-o à equipe de personalização. A ZR3 só recebe as suas escolhas por meio desse envio.</p></div>
       ${podeGerar ? '' : `<p class="field-error">${ic('alerta')} Há informações pendentes. Ao tocar em "Gerar PDF", você vai até elas.</p>`}
       <button type="button" class="btn primary lg block" data-act="gerar" ${S.confirmado ? '' : 'disabled'}>${ic('download')}<span>Gerar PDF da minha personalização</span></button>
-      ${regrasHtml()}
       <div id="pos-pdf">${S.pdf ? posPdf(e) : ''}</div>
     </section>`;
   }
 
+  function pesquisaHtml() {
+    const P = CFG.pesquisa; if (!P || !(P.perguntas || []).length || captura) return '';
+    const r = S.pesquisa || {};
+    return `<section class="card rgroup pesquisa"><div class="rgroup-h"><h2>${ic('star')} ${esc(P.titulo)}</h2></div>${P.texto ? `<p class="muted">${esc(P.texto)}</p>` : ''}
+      ${P.perguntas.map((q) => { const v = r[q.id] || 0; return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="stars" role="radiogroup" aria-label="${esc(q.texto)}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} de 5: ${esc((P.rotulos || [])[n - 1] || '')}" data-act="pesquisa" data-q="${q.id}" data-n="${n}">${ic('star')}</button>`).join('')}<span class="pq-r">${v ? esc((P.rotulos || [])[v - 1] || '') : ''}</span></div></div>`; }).join('')}
+      <p class="hint">${ic('info')} As respostas não aparecem no PDF.</p></section>`;
+  }
   function msgWhats(e) {
     const m = (e.contato || {}).mensagemWhats || 'Olá! Sou {nome}, unidade {unidade} do {empreendimento}. Segue o PDF da minha personalização da 3ª etapa (protocolo {protocolo}).';
     return m.replace('{nome}', S.cliente.nome || '').replace('{unidade}', S.cliente.unidade || '').replace('{empreendimento}', e.nome).replace('{protocolo}', (S.pdf || {}).protocolo || '');
   }
+  const podeCompartilhar = () => !!(ultimoPdf && navigator.canShare && (() => { try { return navigator.canShare({ files: [ultimoPdf.file] }); } catch (err) { return false; } })());
+  const celular = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   function posPdf(e) {
     const ct = e.contato || {};
     const msg = encodeURIComponent(msgWhats(e));
-    const podeShare = !!(ultimoPdf && navigator.canShare && navigator.canShare({ files: [ultimoPdf.file] }));
+    const podeShare = podeCompartilhar();
+    const soShare = podeShare && celular();
     return `<div class="done">
       <div class="done-h">${ic('check')}<div><strong>PDF gerado com sucesso</strong><span>Protocolo ${esc(S.pdf.protocolo)} · ${new Date(S.pdf.em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></div></div>
       <div class="callout warn">${ic('alerta')}<p><strong>Falta um passo:</strong> envie este PDF à ${esc(ct.equipe || 'equipe de personalização')} por WhatsApp ou e-mail. Sem o envio, a ZR3 não recebe as suas escolhas.</p></div>
       ${ct.whatsapp ? `<div class="zap">
         <a class="btn zap-btn block" target="_blank" rel="noopener" href="https://wa.me/${esc(E.soDigitos(ct.whatsapp))}?text=${msg}">${ic('msg')}<span>Enviar pelo WhatsApp da ZR3</span></a>
-        <ol class="zap-passos"><li>O PDF já foi baixado para este aparelho. Se precisar de outra cópia, use “Gerar novamente”: ela sai com a data de hoje e os valores atuais.</li><li>O botão abre a conversa com a ZR3, com a mensagem pronta.</li><li>Toque no clipe 📎, escolha <strong>Documento</strong>, anexe o PDF e envie.</li></ol>
+        <ol class="zap-passos"><li>${soShare ? 'Toque em <strong>Salvar ou compartilhar o PDF</strong> (abaixo) e escolha <strong>Salvar em Arquivos</strong> ou envie direto pelo WhatsApp.' : 'O PDF já foi baixado para este aparelho. Se precisar de outra cópia, use “Gerar novamente”: ela sai com a data de hoje e os valores atuais.'}</li><li>O botão abre a conversa com a ZR3, com a mensagem pronta.</li><li>Toque no clipe 📎, escolha <strong>Documento</strong>, anexe o PDF e envie.</li></ol>
       </div>` : ''}
       <div class="done-act">
         <button type="button" class="btn ghost" data-act="gerar">${ic('download')}<span>Gerar novamente</span></button>
-        ${podeShare ? `<button type="button" class="btn primary" data-act="compartilhar">${ic('share')}<span>Compartilhar o PDF</span></button>` : ''}
+        ${podeShare ? `<button type="button" class="btn primary" data-act="compartilhar">${ic('share')}<span>${soShare ? 'Salvar ou compartilhar o PDF' : 'Compartilhar o PDF'}</span></button>` : ''}
         ${ct.email ? `<a class="btn ghost" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF baixado)">${ic('mail')}<span>Enviar por e-mail</span></a>` : ''}
       </div>
-      <p class="hint">O WhatsApp não permite anexar o arquivo automaticamente: é preciso <strong>anexar o PDF baixado</strong> na conversa.</p>
+      <p class="hint">${soShare ? 'Pelo <strong>Salvar ou compartilhar o PDF</strong>, você também pode enviar o arquivo direto para a conversa da ZR3 no WhatsApp.' : 'O WhatsApp não permite anexar o arquivo automaticamente: é preciso <strong>anexar o PDF baixado</strong> na conversa.'}</p>
       <div class="proximos"><h3>Depois do envio</h3>
         <ol>
           <li>A equipe de personalização confere as suas escolhas e prepara o orçamento definitivo e o projeto atualizado.</li>
@@ -1720,6 +1800,19 @@
       case 'aba-prox': avancar(); break;
       case 'aba-ant': voltar(); break;
       case 'voltar': voltar(); break;
+      case 'sacada-info': {
+        ev.preventDefault(); ev.stopPropagation();
+        const ss = E.secoes(emp(), S).find((x) => x.tipo === 'sacada'); const r = ss.regras;
+        const lista = (arr) => arr.map(pad2).join(', ').replace(/, ([^,]*)$/, ' e $1');
+        abrirModal(`<ul class="bul"><li><strong>Incluso:</strong> nos finais ${lista(r.inclusoFinais)}${r.gruposSemFinal === 'incluso' ? ' e nos lofts' : ''}, o fechamento de sacada faz parte do padrão de entrega e está contemplado no valor do imóvel. Não é preciso adquiri-lo separadamente.</li><li><strong>Item personalizado:</strong> nos finais ${lista(r.personalizadoFinais)}, o fechamento é obrigatório para quem integrou a sacada ao living na 1ª etapa e opcional para quem não integrou.</li><li><strong>Modelo:</strong> padronizado pela construtora para manter o padrão estético do empreendimento.</li></ul>`, { titulo: 'Fechamento de sacada' });
+        break;
+      }
+      case 'info-perg': {
+        ev.preventDefault(); ev.stopPropagation();
+        const s = E.secoes(emp(), S).find((x) => x.id === t.dataset.s);
+        if (s) abrirModal(`<ul class="bul">${(s.info || []).map((x) => `<li>${temaNegrito(x)}</li>`).join('')}</ul>`, { titulo: s.titulo });
+        break;
+      }
       case 'help': {
         ev.preventDefault(); ev.stopPropagation();
         const g = CFG.glossario[t.dataset.k];
@@ -1804,9 +1897,9 @@
           limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); render();
           break;
         }
-        const sl = E.secoes(e, S).find((x) => x.linhas && x.linhas.id === t.dataset.lid); if (!sl) break;
-        const usam = (x) => x.linhas && x.linhas.id === sl.linhas.id;
-        const L = sl.linhas, es = E.esc(S, L.id), o = L.opcoes.find((x) => x.id === t.dataset.l);
+        const sl = secDaLinha(e, t.dataset.lid); if (!sl) break;
+        const usam = (x) => x.linhas && x.linhas.id === sl.linhas.id && !x.linhasPorAmbiente;
+        const L = sl.linhas, es = escLinha(t.dataset.lid, sl), o = L.opcoes.find((x) => x.id === t.dataset.l);
         if (es.linha !== o.id) {
           es.linha = o.id; es.tom = E.tomEscolhido(L, es); delete es.autoBrinde;
           const cores = E.coresNoTom(L, o, es.tom);
@@ -1822,7 +1915,7 @@
           if (removidas.length) toast(`Não disponível na linha ${o.nome}: ${removidas.join(', ')}. Escolha de novo.`);
         }
         sincronizarMarcas(e);
-        if (es.cor || !(o.cores || []).length) linhasAbertas.delete(L.id);
+        if (es.cor || !(o.cores || []).length) linhasAbertas.delete(t.dataset.lid);
         erros = erros.filter((x) => !(x.campo.endsWith('-linha') || /interruptor/i.test(x.msg)));
         salvar(); render();
         break;
@@ -1847,12 +1940,18 @@
         break;
       }
       case 'video': abrirVideo(+t.dataset.v); break;
+      case 'video-replay': { const v = $modal.querySelector('.vid-modal video'); if (v) { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); } break; }
+      case 'pesquisa': {
+        S.pesquisa = S.pesquisa || {}; const q = t.dataset.q, n = +t.dataset.n;
+        S.pesquisa[q] = S.pesquisa[q] === n ? 0 : n;
+        S.pesquisa.em = new Date().toISOString(); salvar(false); render(); break;
+      }
       case 'loop-pausa': fotosPausadas = !fotosPausadas; render(); break;
       case 'protocolos': abrirModal(protocolosHtml(e, true), { titulo: e.protocolos.titulo, largo: true }); break;
       case 'linha-tom': {
         let es, L, sg = null;
         if (t.dataset.g != null) { sg = E.secao(e, t.dataset.s, S); es = gruposEdit(sg)[+t.dataset.g]; L = sg.linhas; }
-        else { const sl = E.secoes(e, S).find((x) => x.linhas && x.linhas.id === t.dataset.lid); if (!sl) break; L = sl.linhas; es = E.esc(S, L.id); }
+        else { const sl = secDaLinha(e, t.dataset.lid); if (!sl) break; L = sl.linhas; es = escLinha(t.dataset.lid, sl); }
         es.tom = t.dataset.t; delete es.autoBrinde;
         const o = es.linha ? L.opcoes.find((x) => x.id === es.linha) : null;
         const cs = o ? E.coresNoTom(L, o, es.tom) : [];
@@ -1867,8 +1966,8 @@
       }
       case 'linha-cor': {
         if (t.dataset.g != null) { const sg = E.secao(e, t.dataset.s, S); gruposEdit(sg)[+t.dataset.g].cor = t.dataset.c; gruposAbertos.delete(`${sg.id}-${t.dataset.g}`); limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); render(); break; }
-        const sl = E.secoes(e, S).find((x) => x.linhas && x.linhas.id === t.dataset.lid); if (!sl) break;
-        E.esc(S, sl.linhas.id).cor = t.dataset.c; linhasAbertas.delete(sl.linhas.id);
+        const sl = secDaLinha(e, t.dataset.lid); if (!sl) break;
+        escLinha(t.dataset.lid, sl).cor = t.dataset.c; linhasAbertas.delete(t.dataset.lid);
         erros = erros.filter((x) => !(x.campo.endsWith('-linha') || /interruptor/i.test(x.msg)));
         salvar(); render();
         break;
@@ -1890,9 +1989,15 @@
         es.amb[para] = novo;
         if ((es.modelos || {})[de]) es.modelos[para] = es.modelos[de];
         Object.keys(es.adicionais || {}).forEach((ad) => { es.adicionais[ad][para] = !!es.adicionais[ad][de]; });
+        if (s.linhasPorAmbiente && novo === 'sim') {
+          const kd = E.chaveLinha(s, de), kp = E.chaveLinha(s, para), orig = S.escolhas[kd] || S.escolhas[s.linhas.id];
+          if (orig) { S.escolhas[kp] = JSON.parse(JSON.stringify(orig)); delete S.escolhas[kp].autoBrinde; linhasAbertas.delete(kp); }
+          sincronizarMarcas(e);
+        }
         erros = erros.filter((x) => x.campo !== s.id + '-' + para);
         salvar(); render();
-        toast(`Mesma escolha aplicada: ${es.amb[para] === 'sim' ? 'quero persiana' : 'não quero persiana'}.`);
+        const sp = E.secao(e, s.id, S), lnP = sp._porAmb && sp._porAmb[para] && sp._porAmb[para].ln;
+        toast(`Mesma escolha aplicada: ${es.amb[para] === 'sim' ? 'quero persiana' + (lnP ? ', com o interruptor ' + E.nomeLinha(lnP) : '') : 'não quero persiana'}.`);
         break;
       }
       case 'aux-amb': {
@@ -1963,7 +2068,7 @@
       case 'sacada-int': {
         const es = E.esc(S, 'sacada');
         if (es.integracao !== t.dataset.v) { es.integracao = t.dataset.v; es.ciente = false; es.adquirir = null; }
-        limparErro('sacada'); salvar(); render();
+        limparErro('sacada'); limparErro('sacada-integracao'); salvar(); render();
         break;
       }
       case 'sacada-adq': { const es = E.esc(S, 'sacada'); es.adquirir = t.dataset.v; es.ciente = false; limparErro('sacada'); salvar(); render(); break; }
@@ -2009,7 +2114,12 @@
     if (t.dataset.act === 'pers-modelo') { const es = E.esc(S, t.dataset.s); es.modelos = es.modelos || {}; es.modelos[t.dataset.a] = t.value; limparErro(t.dataset.s); salvar(); render(); return; }
     if (t.dataset.act === 'aux') {
       const es = E.esc(S, t.dataset.s); es.auxilio = t.checked;
-      if (t.checked) es.nenhum = false; else es.auxAmb = [];
+      if (t.checked) {
+        es.nenhum = false;
+        const s = E.secao(e, t.dataset.s);
+        if (s && s.linhasMultiplas) { gruposEdit(s).forEach((g) => { g.qtd = {}; }); sincronizarQtd(s); } else es.qtd = {};
+        toast('Com o auxílio, a equipe da ZR3 faz a contagem das peças. Escolha só a linha de preferência.');
+      } else es.auxAmb = [];
       limparErro(t.dataset.s); limparErro(t.dataset.s + '-aux'); salvar(); render(); return;
     }
     if (t.dataset.act === 'acion') {
@@ -2019,7 +2129,7 @@
       if (S.avisosNao && s.acionamento.avisoSem && o.id === s.acionamento.avisoSem.opcao) delete S.avisosNao[chaveAvisoSem(s)];
       if (t.checked && o.marca) {
         const alvo = E.secao(e, o.marca.secao, S);
-        if (alvo && E.resposta(S, e, alvo) !== o.marca.resposta) { marcarAuto(alvo, o.marca.resposta); toast(`${alvo.aba || alvo.titulo} marcada: ${o.marca.mensagem.charAt(0).toLowerCase() + o.marca.mensagem.slice(1)}`); }
+        if (alvo && E.resposta(S, e, alvo) !== o.marca.resposta) marcarComValor(e, alvo, o.marca.resposta, `${alvo.aba || alvo.titulo} marcada: ${o.marca.mensagem.charAt(0).toLowerCase() + o.marca.mensagem.slice(1)}`);
       }
       erros = erros.filter((x) => !x.campo.startsWith(s.id + '-'));
       salvar(); render(); return;
@@ -2051,6 +2161,11 @@
 
   document.addEventListener('input', (ev) => {
     const t = ev.target;
+    if (t.dataset.gobs != null) {
+      const s = E.secao(emp(), t.dataset.s); const g = s && gruposEdit(s)[+t.dataset.gobs];
+      if (g) { g.obs = t.value.slice(0, 160); salvar(); }
+      return;
+    }
     const b = t.dataset.bind;
     if (b && b !== 'empId' && b !== 'contatoTipo') {
       if (b === 'contato' && S.cliente.contatoTipo !== 'email') {
@@ -2133,11 +2248,14 @@
       const C0 = '<' + '!--', C1 = '--' + '>', SC = 'scr' + 'ipt';
       const partes = E.etapas(e, S).map((et) => `${C0} etapa: ${et.id} ${C1}${telaEtapa(e, et)}`);
       const cab = `${C0} registro ${protocolo} · ${agora.toISOString()} · versão ${CFG.versao || '—'} · tabela ${codigoTabela} · ${S.cliente.nome} · unidade ${S.cliente.unidade} ${C1}`;
-      const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: S.escolhas }).replace(/</g, '\\u003c')}</${SC}>`;
+      const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: S.escolhas, pesquisa: S.pesquisa || null }).replace(/</g, '\\u003c')}</${SC}>`;
+
+      const P = CFG.pesquisa, R = S.pesquisa || {};
+      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] ? R[q.id] + '/5 · ' + esc((P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
 
       const nomes = new Map(Object.entries(window.ZR3_ASSETS || {}).map(([k, v]) => [v, k]));
       const semEmbutidos = (h) => h.replace(/data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]+/gi, (m) => nomes.get(m) || 'data:(arquivo embutido)');
-      return semEmbutidos(cab + partes.join('') + dados).replace(/[ \t]*\n[ \t]*/g, ' ').replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ');
+      return semEmbutidos(cab + partes.join('') + pesq + dados).replace(/[ \t]*\n[ \t]*/g, ' ').replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ');
     } catch (err) {
       console.warn('Registro do preenchimento não gerado:', err);
       return '';
@@ -2202,10 +2320,11 @@
       ultimoPdf = res;
       S.pdf = { protocolo, em: agora.toISOString(), arquivo: res.nome, tabela: tabela.codigo };
       salvar(false);
-      baixar(res);
+      const soShare = podeCompartilhar() && celular();
+      if (!soShare) baixar(res);
       render();
       const d = document.getElementById('pos-pdf'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      toast('PDF gerado. Agora envie à equipe de personalização.');
+      toast(soShare ? 'PDF pronto. Toque em “Salvar ou compartilhar o PDF” e envie à equipe de personalização.' : 'PDF gerado. Agora envie à equipe de personalização.');
     } catch (err) {
       console.error(err);
       toast('Não foi possível gerar o PDF. Tente novamente.', 'erro');
@@ -2266,6 +2385,14 @@
   S.tela = 'inicio';
   try { if (!(history.state && history.state.zr3)) history.replaceState({ base: 1 }, ''); } catch (e) {   }
   render();
+
+  document.addEventListener('error', (ev) => {
+    const t = ev.target;
+    if (!t || t.tagName !== 'IMG' || !t.getAttribute('src')) return;
+    if (!t.dataset.retry) { t.dataset.retry = '1'; t.loading = 'eager'; const s = t.getAttribute('src'); setTimeout(() => { t.src = s + (s.includes('?') ? '&' : '?') + 'r=1'; }, 400); return; }
+    const ph = document.createElement('div'); ph.className = (t.className || '') + ' ph'; ph.setAttribute('role', 'img'); ph.setAttribute('aria-label', t.alt || 'Imagem'); ph.innerHTML = ic('imagem') + '<span>Imagem indisponível</span>';
+    t.replaceWith(ph);
+  }, true);
   window.__ZR3 = {
     get S() { return S; }, E, CFG,
     api: {

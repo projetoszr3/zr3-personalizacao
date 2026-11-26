@@ -14,7 +14,9 @@
     const g = S ? E.grupo(S, emp) : null;
     const fora = (g && g.naoOferta) || [];
 
-    const oculta = (s) => !!(S && s.ocultarSe && ((S.escolhas || {})[s.ocultarSe.secao] || {}).resposta === s.ocultarSe.resposta);
+    const oculta = (s) => !!(S && s.ocultarSe && ((S.escolhas || {})[s.ocultarSe.secao] || {}).resposta === s.ocultarSe.resposta)
+
+      || (s.tipo === 'sacada-integracao' && !(S && emp && sacadaPergunta(S, emp)));
 
     const porGrupo = (s) => {
       let r = g && s.valorPorGrupo && s.valorPorGrupo[g.id] != null ? Object.assign({}, s, { valor: s.valorPorGrupo[g.id] }) : s;
@@ -36,6 +38,17 @@
         const p = ln.linha.precos || {};
         return Object.assign({}, s, { _linha: ln, itens: s.itens.filter((it) => Object.prototype.hasOwnProperty.call(p, it.id)).map((it) => Object.assign({}, it, { valor: p[it.id], subtitulo: (ln.linha.caixas || {})[it.id] || it.subtitulo, imagem: E.imgPeca(ln, it.id, it.imagem) })) });
       }
+      if (s.linhasPorAmbiente) {
+
+        const porAmb = {};
+        (s.ambientes || []).forEach((a) => {
+          const la = S ? E.linhaEscolhida(S, s, a.id) : null;
+          const v = la ? (la.linha.precos || {})[s.pecaLinha || 'persiana'] : null;
+          porAmb[a.id] = { ln: la, vi: v == null ? null : v };
+        });
+        const prim = (s.ambientes || []).map((a) => porAmb[a.id]).find((x) => x.ln) || { ln: null, vi: null };
+        return Object.assign({}, s, { _porAmb: porAmb, _linha: prim.ln, _valorInterruptor: prim.vi });
+      }
       const vi = ln ? (ln.linha.precos || {})[s.pecaLinha || 'persiana'] : null;
       return Object.assign({}, s, { _linha: ln, _valorInterruptor: vi == null ? null : vi });
     };
@@ -56,10 +69,10 @@
   };
 
   E.linhaEmUso = (S, emp, lid) => E.secoes(emp, S).some((x) => {
-    if (!x.linhas || (lid && x.linhas.id !== lid)) return false;
+    if (!x.linhas || (lid && x.linhas.id !== lid && !(x.linhasPorAmbiente && lid.startsWith(x.linhas.id + '-')))) return false;
     const es = (S.escolhas || {})[x.id] || {};
-    if (x.tipo === 'persianas') return (x.ambientes || []).some((a) => E.ambResp(S, emp, x, a.id) === 'sim');
-    if (x.tipo === 'quantidades') return Object.values(es.qtd || {}).some((n) => n > 0);
+    if (x.tipo === 'persianas') return (x.ambientes || []).some((a) => E.ambResp(S, emp, x, a.id) === 'sim' && (!lid || lid === x.linhas.id || lid === E.chaveLinha(x, a.id)));
+    if (x.tipo === 'quantidades') return !(x.auxilio && es.auxilio) && Object.values(es.qtd || {}).some((n) => n > 0);
     if (x.acionamento) return E.resposta(S, emp, x) === 'sim' && E.acionamento(S, x).sel.includes('interruptor');
     return false;
   });
@@ -78,7 +91,7 @@
     });
 
     const vistos = new Set();
-    const porLinha = secs.filter((x) => x.linhas && x._linha && !vistos.has(x.linhas.id) && vistos.add(x.linhas.id)).flatMap((sl) => {
+    const porLinha = secs.filter((x) => x.linhas && x._linha && !x._porAmb && !vistos.has(x.linhas.id) && vistos.add(x.linhas.id)).flatMap((sl) => {
       const ln = sl._linha;
       return ln.linha.exige && E.linhaEmUso(S, emp, sl.linhas.id) ? [Object.assign({ origem: sl, opcao: ln.linha, motivo: `linha ${ln.linha.nome} ${ln.linha.fabricante || ''}`.trim() + ` para ${sl.linhas.uso || 'os interruptores'}` }, ln.linha.exige)] : [];
     });
@@ -86,7 +99,11 @@
     const porGrupoLinha = secs.filter((x) => x._grupos).flatMap((sl) => sl._grupos.filter((g) => g.ln && g.ln.linha.exige && Object.values(g.raw.qtd || {}).some((n) => n > 0)).map((g) => Object.assign({ origem: sl, opcao: g.ln.linha, motivo: `linha ${g.ln.linha.nome} ${g.ln.linha.fabricante || ''}`.trim() + ` para ${sl.linhas.uso || 'os interruptores'}` }, g.ln.linha.exige)));
 
     const valeLinha = (m) => !E.dispensado(S, emp, E.secao(emp, m.secao, S));
-    return porAcion.concat(porLinha.filter((m) => !m.origem._grupos && valeLinha(m)), porGrupoLinha.filter(valeLinha));
+
+    const porAmbLinha = secs.filter((x) => x._porAmb).flatMap((sl) => (sl.ambientes || [])
+      .filter((a) => E.ambResp(S, emp, sl, a.id) === 'sim').map((a) => sl._porAmb[a.id].ln).filter((ln) => ln && ln.linha.exige)
+      .map((ln) => Object.assign({ origem: sl, opcao: ln.linha, motivo: `linha ${ln.linha.nome} ${ln.linha.fabricante || ''}`.trim() + ` para ${sl.linhas.uso || 'a persiana'}` }, ln.linha.exige)));
+    return porAcion.concat(porLinha.filter((m) => !m.origem._grupos && valeLinha(m)), porGrupoLinha.filter(valeLinha), porAmbLinha.filter(valeLinha));
   };
   E.pecaAcionamento = (sec, id) => ((sec.acionamento && sec.acionamento.pecas && sec.acionamento.pecas.opcoes) || []).find((p) => p.id === id);
 
@@ -101,7 +118,7 @@
     const es = ((S && S.escolhas) || {})[sec.id] || {};
     if (Array.isArray(es.grupos) && es.grupos.length) return es.grupos;
     const ant = ((S && S.escolhas) || {})[sec.linhas.id] || {};
-    return [{ linha: ant.linha || null, cor: ant.cor || null, qtd: Object.assign({}, es.qtd || {}) }];
+    return [{ linha: ant.linha || null, cor: ant.cor || null, qtd: Object.assign({}, es.qtd || {}), obs: '' }];
   };
   E.gruposLinha = (S, sec) => E.gruposRaw(S, sec).map((g, i) => {
     const ln = E.linhaResolver(sec.linhas, g);
@@ -112,7 +129,8 @@
 
   E.qtdItens = (S, sec) => {
     const es = ((S && S.escolhas) || {})[sec.id] || {};
-    if (sec._grupos) return sec._grupos.flatMap((g) => g.itens.map((it) => ({ it, n: (g.raw.qtd || {})[it.id] || 0, ln: g.ln })).filter((x) => x.n > 0));
+    if (sec.auxilio && es.auxilio) return [];
+    if (sec._grupos) return sec._grupos.flatMap((g) => g.itens.map((it) => ({ it, n: (g.raw.qtd || {})[it.id] || 0, ln: g.ln, obs: g.raw.obs || '' })).filter((x) => x.n > 0));
     return (sec.itens || []).filter(E.ativo).map((it) => ({ it, n: (es.qtd || {})[it.id] || 0, ln: sec._linha })).filter((x) => x.n > 0);
   };
 
@@ -148,10 +166,13 @@
     return ent.filter(([, src], i) => !ent.slice(i + 1).some(([, s2]) => s2 === src)).map(([peca, src]) => ({ peca, src }));
   };
 
-  E.linhaEscolhida = (S, sec) => {
+  E.chaveLinha = (sec, ambId) => (sec && sec.linhasPorAmbiente && ambId ? `${sec.linhas.id}-${ambId}` : sec.linhas.id);
+  E.linhaEscolhida = (S, sec, ambId) => {
     const L = sec && sec.linhas;
     if (!L || !S) return null;
-    const es = (S.escolhas || {})[L.id] || {};
+    const esc = S.escolhas || {}, k = E.chaveLinha(sec, ambId);
+
+    const es = esc[k] || (k !== L.id ? esc[L.id] : null) || {};
     const o = (L.opcoes || []).find((x) => x.id === es.linha && E.ativo(x));
     if (!o) return null;
     const cores = o.cores || [];
@@ -263,6 +284,11 @@
       return Object.assign(out, { modo: regra === 'obrigatorio' ? 'obrigatorio' : regra === 'consulta' ? 'consulta' : 'opcional', fonte: 'cliente' });
     }
     return Object.assign(out, { modo: 'pendente' });
+  };
+
+  const sacadaPergunta = (S, emp) => {
+    const sec = emp.etapas.flatMap((et) => et.secoes).find((x) => x.tipo === 'sacada');
+    return !!(sec && E.sacada(S, sec, emp).precisaPerguntar);
   };
 
   E.produtoSacada = (S, emp, sec) => {
@@ -398,7 +424,7 @@
       case 'sacada': {
         const sc = E.sacada(S, sec, emp);
         if (sc.modo === 'semFinal') er.push({ campo: sec.id, msg: 'Informe o final da unidade na identificação.' });
-        else if (sc.modo === 'pendente') er.push({ campo: sec.id + '-integracao', msg: 'Informe se a sua unidade fez a integração da sacada.' });
+        else if (sc.modo === 'pendente') er.push({ campo: sec.id + '-integracao', msg: 'Responda, em Etapas anteriores, se a sua unidade fez a integração da sacada.' });
         else {
           if (sc.modo === 'opcional' || sc.modo === 'consulta') {
             if (!e.adquirir) er.push({ campo: sec.id + '-adquirir', msg: 'Indique se deseja adquirir o fechamento de sacada.' });
@@ -436,22 +462,32 @@
           const r = E.ambResp(S, emp, sec, a.id);
           if (r !== 'sim' && r !== 'nao') er.push({ campo: sec.id + '-' + a.id, msg: `Indique se deseja persiana: ${a.nome}.` });
           else if (r === 'sim' && (sec.modelos || []).filter(E.ativo).length > 1 && !opcaoValida({ opcoes: sec.modelos }, (e.modelos || {})[a.id])) er.push({ campo: sec.id + '-' + a.id, msg: `Escolha o modelo de persiana: ${a.nome}.` });
-          else if (r === 'sim' && sec.linhas && !(sec._linha && sec._linha.completa)) er.push({ campo: sec.id + '-' + a.id, msg: sec._linha ? 'Escolha a cor do interruptor da persiana.' : 'Escolha a cor e a linha do interruptor da persiana.' });
+          else if (r === 'sim' && sec.linhas && !((sec._porAmb ? sec._porAmb[a.id].ln : sec._linha) || {}).completa) er.push({ campo: sec.id + '-' + a.id, msg: (sec._porAmb ? sec._porAmb[a.id].ln : sec._linha) ? 'Escolha a cor do interruptor da persiana.' : 'Escolha a cor e a linha do interruptor da persiana.' });
         });
         break;
       }
       case 'quantidades': {
 
-        const algum = Object.values(e.qtd || {}).some((n) => n > 0) || auxAtivo(sec, e);
-        if (sec.auxilio && e.auxilio && !(e.auxAmb || []).length) er.push({ campo: sec.id + '-aux', msg: 'Marque os ambientes em que tem interesse na automação.' });
+        const comAux = !!(sec.auxilio && e.auxilio);
+        const algum = (!comAux && Object.values(e.qtd || {}).some((n) => n > 0)) || auxAtivo(sec, e);
+        if (comAux && !(e.auxAmb || []).length) er.push({ campo: sec.id + '-aux', msg: 'Marque os ambientes em que tem interesse na automação.' });
         else if (!algum && !e.nenhum && E.requisitoOk(S, emp, sec)) er.push({ campo: sec.id, msg: `${sec.titulo}: escolha a quantidade ou marque "Não quero".` });
-        (sec.itens || []).filter((it) => E.ativo(it) && it.escolha && ((e.qtd || {})[it.id] || 0) > 0 && !(e.itemEscolha || {})[it.id]).forEach((it) => er.push({ campo: `${sec.id}-esc-${it.id}`, msg: `${it.escolha.titulo}: escolha uma opção.` }));
-        if (sec._grupos) sec._grupos.forEach((g) => {
+        (sec.itens || []).filter((it) => E.ativo(it) && it.escolha && ((e.qtd || {})[it.id] || 0) > 0 && !(e.itemEscolha || {})[it.id]).forEach((it) => er.push({ campo: `${sec.id}-esc-${it.id}`, msg: it.escolha.erro || `${it.escolha.titulo}: escolha uma opção.` }));
+        if (sec._grupos && comAux) sec._grupos.forEach((g) => {
+
+          if ((g.i === 0 || g.ln) && !(g.ln && g.ln.completa)) er.push({ campo: `${sec.id}-g${g.i}`, msg: g.ln ? `Linha de preferência ${g.i + 1}: escolha a cor.` : `Escolha a linha de preferência dos interruptores (cor e linha).` });
+        });
+        else if (sec._grupos) sec._grupos.forEach((g) => {
           const temQ = Object.values(g.raw.qtd || {}).some((n) => n > 0);
           if ((temQ || (g.ln && !g.ln.completa) || (sec._grupos.length > 1 && !g.ln)) && !(g.ln && g.ln.completa)) er.push({ campo: `${sec.id}-g${g.i}`, msg: g.ln ? `Linha ${g.i + 1}: escolha a cor.` : `Linha ${g.i + 1}: escolha a linha e a cor.` });
           else if (sec._grupos.length > 1 && g.ln && !temQ) er.push({ campo: `${sec.id}-g${g.i}`, msg: `Linha ${g.i + 1}: informe as peças ou remova esta linha.` });
         });
         else if (sec.linhas && Object.values(e.qtd || {}).some((n) => n > 0) && !(sec._linha && sec._linha.completa)) er.push({ campo: sec.id + '-linha', msg: sec._linha ? 'Escolha a cor dos interruptores.' : 'Escolha a cor e a linha dos interruptores.' });
+        break;
+      }
+      case 'sacada-integracao': {
+        const ss = emp.etapas.flatMap((et) => et.secoes).find((x) => x.tipo === 'sacada');
+        if (ss && E.sacada(S, ss, emp).modo === 'pendente') er.push({ campo: sec.id, msg: 'Informe se a sua unidade fez a integração da sacada.' });
         break;
       }
       case 'pergunta':
@@ -523,11 +559,14 @@
             break;
           }
           case 'quantidades':
-            if (auxAtivo(sec, e)) push(Object.assign({}, base, { item: `${sec.aba || sec.titulo} – auxílio na quantificação`, detalhe: `Cliente tem interesse e solicita auxílio da ZR3 para a contagem dos circuitos e peças. Ambientes: ${(e.auxAmb || []).join(', ')}.`, status: 'consulta' }));
+            if (auxAtivo(sec, e)) {
+              const pref = (sec._grupos || []).filter((g) => g.ln && g.ln.completa).map((g) => E.nomeLinha(g.ln) + (E.protocoloLinha(g.ln) ? ' (' + E.protocoloLinha(g.ln) + ')' : ''));
+              push(Object.assign({}, base, { item: `${sec.aba || sec.titulo} – auxílio na quantificação`, detalhe: `Cliente tem interesse e solicita auxílio da ZR3 para a contagem dos circuitos e peças. Ambientes: ${(e.auxAmb || []).join(', ')}.${pref.length ? ` Linha de preferência: ${pref.join('; ')}.` : ''}`, status: 'consulta' }));
+            }
             if (e.nenhum && !Object.values(e.qtd || {}).some((n) => n > 0)) { push(Object.assign({}, base, { item: sec.titulo, detalhe: 'Não contratado.', status: 'nao', imagem: sec.imagem || ((sec.itens || []).find((it) => E.ativo(it) && it.imagem) || {}).imagem })); break; }
-            E.qtdItens(S, sec).forEach(({ it, n, ln }) => {
+            E.qtdItens(S, sec).forEach(({ it, n, ln, obs }) => {
               const escI = it.escolha && (it.escolha.opcoes || []).find((o) => o.id === (e.itemEscolha || {})[it.id]);
-              push(Object.assign({}, base, { item: it.nome, detalhe: [sec.titulo, ln ? 'Linha ' + E.nomeLinha(ln) + (E.protocoloLinha(ln) ? ' (' + E.protocoloLinha(ln) + ')' : '') : '', it.subtitulo, escI ? `${it.escolha.titulo}: ${escI.rotulo}` : ''].filter(Boolean).join(' · '), qtd: n, unit: it.valor, total: it.valor == null ? null : it.valor * n, status: it.valor == null ? 'consulta' : 'opcional', imagem: it.imagem }));
+              push(Object.assign({}, base, { item: it.nome, detalhe: [sec.titulo, ln ? 'Linha ' + E.nomeLinha(ln) + (E.protocoloLinha(ln) ? ' (' + E.protocoloLinha(ln) + ')' : '') : '', it.subtitulo, escI ? (escI.resumo || `${it.escolha.titulo}: ${escI.rotulo}`) : '', obs ? 'Local: ' + obs : ''].filter(Boolean).join(' · '), qtd: n, unit: it.valor, total: it.valor == null ? null : it.valor * n, status: it.valor == null ? 'consulta' : 'opcional', imagem: it.imagem }));
             });
             break;
           case 'pergunta': {
@@ -566,15 +605,16 @@
               if (!m) return;
 
               const bi = brinde && brinde.interruptor && sec.linhas ? brinde.interruptor : null;
-              const padrao = !!(bi && sec._linha && sec._linha.linha.id === bi.linha);
+              const lnA = sec._porAmb ? sec._porAmb[amb.id].ln : sec._linha;
+              const padrao = !!(bi && lnA && lnA.linha.id === bi.linha);
               const semAcr = !!(bi && padrao);
               push(Object.assign({}, base, { peca: true, semAcrescimo: semAcr, item: `Persiana – ${amb.nome}`, detalhe: m.nome + (brinde && (e.amb || {})[amb.id] !== 'sim' ? ' (incluída pelo brinde)' : ''), unit: m.valor, total: m.valor, status: m.valor == null ? 'consulta' : 'opcional', imagem: m.imagem, specs: (m.specs || []).slice(0, 2).map((x) => x.join(': ')) }));
 
-              const vi = sec.linhas ? sec._valorInterruptor : undefined;
-              const nomeLn = sec._linha ? 'Linha ' + E.nomeLinha(sec._linha) + (E.protocoloLinha(sec._linha) ? ' (' + E.protocoloLinha(sec._linha) + ')' : '') : 'Linha a escolher';
-              const imgInt = sec._linha ? E.imgLinhaUso(sec.linhas, sec._linha) : '';
+              const vi = sec.linhas ? (sec._porAmb ? sec._porAmb[amb.id].vi : sec._valorInterruptor) : undefined;
+              const nomeLn = lnA ? 'Linha ' + E.nomeLinha(lnA) + (E.protocoloLinha(lnA) ? ' (' + E.protocoloLinha(lnA) + ')' : '') : 'Linha a escolher';
+              const imgInt = lnA ? E.imgLinhaUso(sec.linhas, lnA) : '';
               if (bi) {
-                if (padrao || !sec._linha) push(Object.assign({}, base, { parte: 'interruptor', semAcrescimo: semAcr, item: `Interruptor da persiana – ${amb.nome}`, detalhe: nomeLn + (padrao ? ' · interruptor padrão do brinde' : ''), unit: padrao ? 0 : null, total: padrao ? 0 : null, status: padrao ? 'incluso' : 'consulta', imagem: imgInt }));
+                if (padrao || !lnA) push(Object.assign({}, base, { parte: 'interruptor', semAcrescimo: semAcr, item: `Interruptor da persiana – ${amb.nome}`, detalhe: nomeLn + (padrao ? ' · interruptor padrão do brinde' : ''), unit: padrao ? 0 : null, total: padrao ? 0 : null, status: padrao ? 'incluso' : 'consulta', imagem: imgInt }));
                 else {
                   const pp = ((sec.linhas.opcoes.find((o) => o.id === bi.linha) || {}).precos || {})[sec.pecaLinha || 'persiana'];
                   const va = bi.cobranca === 'integral' ? (vi == null ? null : vi) : (vi == null || pp == null ? null : Math.max(0, vi - pp));

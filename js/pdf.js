@@ -276,20 +276,23 @@
     let regIni = 0;
     if (reg) {
       anexarArquivo(doc, nomeReg, reg, 'Registro do preenchimento (replica em HTML)');
-      const PT = 25.4 / 72, MIN_PT = 1.6, MAX_PT = 6, LH = 1.12;
+      const PT = 25.4 / 72, MIN_PT = 0.8, MAX_PT = 6, LH = 1.12;
       doc.addPage(); regIni = doc.getNumberOfPages();
       fonte(10, 'bold', NAVY); doc.text(t('Anexo · Registro do preenchimento (réplica em HTML)'), M, 12);
       fonte(7.5, 'normal', MUTED);
-      const expl = doc.splitTextToSize(t(`Réplica das telas como foram preenchidas, com o estilo da plataforma, para consulta da ZR3. O arquivo ${nomeReg} está anexado a este PDF (painel de anexos do leitor de PDF). Para recuperar pelo texto: copie do início (<!doctype html>) ao fim (</html>) e salve como .html. ${reg.length.toLocaleString('pt-BR')} caracteres.`), CW);
+      const expl = doc.splitTextToSize(t(`Réplica das telas como foram preenchidas, com o estilo da plataforma, para consulta da ZR3. ${reg.length.toLocaleString('pt-BR')} caracteres.`), CW);
       doc.text(expl, M, 16.5);
       const topo = 16.5 + expl.length * 3.3 + 1, base = H - 8;
 
       const cwPt = CW / PT, altPt = (base - topo) / PT;
 
-      const POR_PAG = 36000;
-      const tam = Math.max(MIN_PT, Math.min(MAX_PT, Math.floor(Math.sqrt((altPt * cwPt) / (0.6 * LH * Math.min(reg.length, POR_PAG) * 1.04)) * 100) / 100));
-      const porLinha = Math.floor(cwPt / (0.6 * tam)), passo = tam * LH * PT;
-      const linhas = quebrarSeguro(reg, porLinha);
+      let tam = Math.min(MAX_PT, Math.ceil(Math.sqrt((altPt * cwPt) / (0.6 * LH * reg.length)) * 1.05 * 100) / 100), linhas;
+      for (;;) {
+        linhas = quebrarSeguro(reg, Math.floor(cwPt / (0.6 * tam)));
+        if (tam <= MIN_PT || linhas.length * tam * LH <= altPt) break;
+        tam = Math.max(MIN_PT, Math.round((tam - 0.02) * 100) / 100);
+      }
+      const passo = tam * LH * PT;
       doc.setFont('courier', 'normal'); doc.setFontSize(tam); cor([150, 158, 170]);
       let i = 0, ry = topo;
       while (i < linhas.length) {

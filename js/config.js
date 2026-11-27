@@ -788,13 +788,14 @@
 
     interruptores: {
       titulo: 'Interruptores inteligentes', pergunta: 'Como funcionam os interruptores inteligentes?',
+
       texto: [
-        'Ligam luzes e tomadas pelo próprio interruptor, pelo aplicativo no celular ou por voz (com a assistente de voz).',
-        'Como escolher: primeiro a cor, depois a linha e, por fim, quantas peças de cada tipo. O valor de cada peça já inclui a instalação e a configuração na rede.',
-        'Mais de uma linha: depois de escolher as peças da primeira linha, toque em “Adicionar outra linha” para mesclar linhas diferentes.',
-        'Somente os pontos que já existem no projeto assinado na 1ª etapa de personalização podem receber automação.',
-        'A passagem de fiação (preparação elétrica) é obrigatória e cobrada à parte, na aba Preparação elétrica.',
-        'Caixa 4x2 e 4x4: tamanhos das caixas embutidas na parede. A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.'
+        ['O que fazem', 'Ligam luzes e tomadas pelo próprio interruptor, pelo aplicativo no celular ou por voz (com a assistente de voz).'],
+        ['Como escolher', 'Primeiro a cor, depois a linha e, por fim, quantas peças de cada tipo. O valor de cada peça já inclui a instalação e a configuração na rede.'],
+        ['Mais de uma linha', 'Depois de escolher as peças da primeira linha, toque em “Adicionar outra linha” para mesclar linhas diferentes.'],
+        ['Pontos permitidos', 'Somente os pontos que já existem no projeto assinado na 1ª etapa de personalização podem receber automação.'],
+        ['Preparação elétrica', 'A passagem de fiação é obrigatória e cobrada à parte, na aba Preparação elétrica.'],
+        ['Caixa 4x2 e 4x4', 'Tamanhos das caixas embutidas na parede. A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.']
       ]
     },
     caixa: { titulo: 'Caixa 4x2 e 4x4', texto: 'São os tamanhos das caixas embutidas na parede (em polegadas). A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.' },
@@ -966,7 +967,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.6',
+    versao: '1.6.1',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',

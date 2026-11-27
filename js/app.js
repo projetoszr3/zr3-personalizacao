@@ -1880,7 +1880,8 @@
       case 'help': {
         ev.preventDefault(); ev.stopPropagation();
         const g = CFG.glossario[t.dataset.k];
-        if (g) abrirModal([].concat(g.texto).map((x) => `<p>${esc(x)}</p>`).join(''), { titulo: g.titulo });
+
+        if (g) abrirModal([].concat(g.texto).map((x) => (Array.isArray(x) ? `<p><strong>${esc(x[0])}:</strong> ${esc(x[1])}</p>` : `<p>${esc(x)}</p>`)).join(''), { titulo: g.titulo });
         break;
       }
       case 'fechar-modal': fecharModal(); break;

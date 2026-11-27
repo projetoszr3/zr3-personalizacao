@@ -732,7 +732,8 @@
     rotuloSim: 'Sim, deixei no contrapiso',
     rotuloNao: 'Não',
     info: [
-      'Os banheiros sempre recebem revestimento; por isso, as portas desses ambientes são instaladas normalmente.',
+      'Padrão da construtora: revestimento no piso e nas paredes dos banheiros; os demais ambientes ficam no contrapiso.',
+      'Como os banheiros recebem revestimento, as portas desses ambientes são instaladas normalmente.',
       'Nos quartos, a instalação não pode ser feita sem o piso acabado, pois a porta precisa da referência de nível do piso.',
       'Por isso, você recebe um crédito de R$ 100,00 de mão de obra por porta de quarto que deixa de ser instalada.',
       'A instalação posterior das portas dos quartos fica por sua conta.'
@@ -967,7 +968,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.6.2',
+    versao: '1.6.3',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',

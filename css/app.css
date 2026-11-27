@@ -769,7 +769,6 @@ button.link { background: none; border: 0; padding: 0; color: var(--blue); text-
 .lgrupo .linha-box { margin-bottom: 12px; }
 .add-linha { margin: 0 0 6px; display: inline-flex; justify-content: center; align-items: center; gap: 6px; width: 100%; }
 .add-linha:disabled { opacity: .5; }
-.add-linha-dica { font-size: 13px; margin: 0 0 14px; text-align: center; }
 .q-esc { grid-column: 1 / -1; margin-top: 4px; padding: 10px; border-radius: var(--r-sm); background: #f6f8fc; border: 1px solid var(--border); }
 .q-esc h5 { margin: 0 0 6px; font-size: 14px; color: var(--navy); }
 .q-esc.has-error { border-color: var(--err); }

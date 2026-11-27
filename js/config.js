@@ -967,7 +967,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.6.1',
+    versao: '1.6.2',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',

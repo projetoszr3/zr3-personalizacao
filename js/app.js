@@ -697,7 +697,7 @@
     <form class="card form" novalidate onsubmit="return false">
       <div class="f ${errDe('nome') ? 'has-error' : ''}">
         <label for="f-nome">Nome completo <span class="req" aria-hidden="true">*</span></label>
-        <input id="f-nome" data-bind="nome" autocomplete="name" value="${esc(c.nome)}" ${aria('nome')} required>${fieldErr('nome')}
+        <input id="f-nome" data-bind="nome" autocomplete="name" maxlength="120" value="${esc(c.nome)}" ${aria('nome')} required>${fieldErr('nome')}
       </div>
       <div class="f ${errDe('empreendimento') ? 'has-error' : ''}">
         <label for="f-emp">Empreendimento <span class="req" aria-hidden="true">*</span></label>
@@ -729,8 +729,8 @@
             <option value="email" ${c.contatoTipo === 'email' ? 'selected' : ''}>E-mail</option>
           </select>
           ${c.contatoTipo === 'email'
-            ? `<input id="f-contato" type="email" data-bind="contato" autocomplete="email" inputmode="email" placeholder="seuemail@exemplo.com" value="${esc(c.contato)}" ${aria('contato')}>`
-            : `<input id="f-contato" type="tel" data-bind="contato" autocomplete="tel" inputmode="tel" placeholder="(47) 99999-0000" value="${esc(c.contato)}" ${aria('contato')}>`}
+            ? `<input id="f-contato" type="email" data-bind="contato" maxlength="120" autocomplete="email" inputmode="email" placeholder="seuemail@exemplo.com" value="${esc(c.contato)}" ${aria('contato')}>`
+            : `<input id="f-contato" type="tel" data-bind="contato" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="(47) 99999-0000" value="${esc(c.contato)}" ${aria('contato')}>`}
         </div>
         ${fieldErr('contato')}
       </div>
@@ -825,6 +825,14 @@
   function escLinha(lid, sl) {
     if (!S.escolhas[lid] && sl && sl.linhasPorAmbiente && lid !== sl.linhas.id && S.escolhas[sl.linhas.id]) S.escolhas[lid] = JSON.parse(JSON.stringify(S.escolhas[sl.linhas.id]));
     return E.esc(S, lid);
+  }
+  const combinacoesLinha = (L) => (L.opcoes || []).filter(E.ativo).reduce((n, o) => n + (((o.cores || []).filter(E.ativo).length) || 1), 0);
+
+  function repetida(gs, gi, linha, cor) {
+    const k = gs.findIndex((x, i) => i !== gi && x.linha === linha && x.cor === cor);
+    if (k < 0) return false;
+    toast(`Essa linha e essa cor já estão na Linha ${k + 1}. Some as peças lá ou escolha outra cor.`, 'erro');
+    return true;
   }
   const linhasAbertas = new Set();
   const gruposAbertos = new Set();
@@ -1387,7 +1395,8 @@
       </div>`;
     }).join('');
     const ultimo = gs[gs.length - 1];
-    const podeAdd = ultimo.ln && ultimo.ln.completa && (aux || Object.values(ultimo.raw.qtd || {}).some((n) => n > 0));
+
+    const podeAdd = gs.length < combinacoesLinha(s.linhas) && ultimo.ln && ultimo.ln.completa && (aux || Object.values(ultimo.raw.qtd || {}).some((n) => n > 0));
     return `${aux ? `<div class="card linha-box lb-intro"><h4 class="lb-t">Linha de preferência dos interruptores</h4><p class="muted">Escolha a cor e a linha que você prefere. A equipe da ZR3 faz a contagem das peças e informa os valores na revisão do orçamento.</p></div>` : ''}
       ${blocos}
       ${podeAdd ? `<button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}">${ic('mais')}<span>${aux ? 'Adicionar outra linha de preferência' : 'Adicionar outra linha'}</span></button>` : ''}
@@ -1958,6 +1967,8 @@
             if (fora.length) toast(`Não disponível na linha ${o.nome}: ${fora.map((k) => (sg.itens.find((it) => it.id === k) || {}).nome || k).join(', ')}. Quantidade zerada.`);
             sincronizarQtd(sg);
           }
+
+          if (g.cor && repetida(gs, +t.dataset.g, g.linha, g.cor)) { g.linha = null; g.cor = null; g.qtd = {}; sincronizarQtd(sg); }
           if (g.cor) gruposAbertos.delete(`${sg.id}-${t.dataset.g}`);
           limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); renderAncorado(t);
           break;
@@ -1991,7 +2002,9 @@
         break;
       }
       case 'grupo-add': {
-        const sg = E.secao(e, t.dataset.s, S); gruposEdit(sg).push({ linha: null, cor: null, qtd: {} });
+        const sg = E.secao(e, t.dataset.s, S);
+        if (gruposEdit(sg).length >= combinacoesLinha(sg.linhas)) break;
+        gruposEdit(sg).push({ linha: null, cor: null, qtd: {} });
         salvar(); render();
         const novo = document.getElementById(`linha-${sg.id}-g${gruposEdit(sg).length - 1}`); if (novo) novo.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
@@ -2035,6 +2048,7 @@
         break;
       }
       case 'linha-cor': {
+        if (t.dataset.g != null && repetida(gruposEdit(E.secao(e, t.dataset.s, S)), +t.dataset.g, gruposEdit(E.secao(e, t.dataset.s, S))[+t.dataset.g].linha, t.dataset.c)) break;
         if (t.dataset.g != null) { const sg = E.secao(e, t.dataset.s, S); gruposEdit(sg)[+t.dataset.g].cor = t.dataset.c; gruposAbertos.delete(`${sg.id}-${t.dataset.g}`); limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); renderAncorado(t); break; }
         const sl = secDaLinha(e, t.dataset.lid); if (!sl) break;
         escLinha(t.dataset.lid, sl).cor = t.dataset.c; linhasAbertas.delete(t.dataset.lid);

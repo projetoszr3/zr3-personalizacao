@@ -46,6 +46,58 @@
     return cache[k];
   }
 
+  function quebrarSeguro(s, n) {
+    const ok = new Uint8Array(s.length);
+    let modo = 'html', aspas = null;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (modo === 'html') {
+        if (c === '<' && s.startsWith('<style', i)) modo = 'css';
+        else if (c === '<' && s.startsWith('<script', i)) modo = 'json';
+        else if (c === ' ') ok[i] = 1;
+        else if (c === '>' && s[i + 1] === '<') ok[i] = 2;
+      } else if (aspas) {
+        if (c === '\\') i++; else if (c === aspas) aspas = null;
+      } else if (modo === 'css') {
+        if (c === '"' || c === "'") aspas = c;
+        else if (s.startsWith('</style', i)) { modo = 'html'; i += 7; ok[i] = 1; }
+        else if (' ;,{}'.includes(c)) ok[i] = 1;
+      } else {
+        if (c === '"') aspas = c;
+        else if (s.startsWith('</script', i)) { modo = 'html'; i += 8; ok[i] = 1; }
+        else if (',:{['.includes(c)) ok[i] = 1;
+      }
+    }
+    const linhas = []; let ini = 0, duras = 0;
+    while (ini < s.length) {
+      let fim = Math.min(s.length, ini + n);
+      if (fim < s.length) {
+        let j = fim; while (j > ini + n / 2 && ok[j - 1] !== 1) j--;
+        if (j <= ini + n / 2) { j = fim; while (j > ini + n / 2 && !ok[j - 1]) j--; }
+        if (j > ini + n / 2) fim = j; else duras++;
+      }
+      linhas.push(s.slice(ini, fim)); ini = fim;
+    }
+    quebrarSeguro.duras = duras;
+    return linhas;
+  }
+
+  function anexarArquivo(doc, nome, conteudo, descricao) {
+    const it = doc.internal; let arvore = 0;
+    it.events.subscribe('postPutResources', () => {
+      const ef = it.newObject();
+      it.putStream({ data: conteudo, filters: ['FlateEncode'], additionalKeyValues: [{ key: 'Type', value: '/EmbeddedFile' }, { key: 'Subtype', value: '/text#2Fhtml' }, { key: 'Params', value: `<< /Size ${conteudo.length} >>` }] });
+      it.write('endobj');
+      const fs = it.newObject();
+      it.write(`<< /Type /Filespec /F (${nome}) /UF (${nome}) /Desc (${descricao}) /AFRelationship /Supplement /EF << /F ${ef} 0 R /UF ${ef} 0 R >> >>`);
+      it.write('endobj');
+      arvore = it.newObject();
+      it.write(`<< /Names [(${nome}) ${fs} 0 R] >>`);
+      it.write('endobj');
+    });
+    it.events.subscribe('putCatalog', () => { if (arvore) it.write(`/Names << /EmbeddedFiles ${arvore} 0 R >>`); });
+  }
+
   async function gerar({ cfg, emp, S, calc, avisos, protocolo, data, E, tabela, registro }) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
@@ -219,36 +271,40 @@
     cor(MUTED, 'draw'); doc.line(M, y + 12, M + 80, y + 12); doc.line(W - M - 80, y + 12, W - M, y + 12);
     fonte(7.5, 'normal', MUTED); doc.text(t('Cliente'), M, y + 16); doc.text(t('ZR3 Empreendimentos – recebido em ___/___/______'), W - M - 80, y + 16);
 
-    const reg = String(registro || '')
-      .replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2010-\u2015]/g, '-').replace(/\u2026/g, '...')
-      .replace(/[^\x20-\x7E\xA0-\xFF]/g, '?');
+    const reg = String(registro || '').replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '?');
+    const nomeReg = `registro-${String(protocolo).replace(/[^A-Za-z0-9-]+/g, '-')}.html`;
+    let regIni = 0;
     if (reg) {
-      const PT = 25.4 / 72, MIN_PT = 1.6, MAX_PT = 6, LH = 1.12, ALT_MAX = (H - 36) / 2;
-      const area = H - 18;
-      doc.addPage(); cabecalhoPequeno();
-      fonte(10, 'bold', NAVY); doc.text(t('Anexo · Registro do preenchimento (HTML)'), M, y);
+      anexarArquivo(doc, nomeReg, reg, 'Registro do preenchimento (replica em HTML)');
+      const PT = 25.4 / 72, MIN_PT = 1.6, MAX_PT = 6, LH = 1.12;
+      doc.addPage(); regIni = doc.getNumberOfPages();
+      fonte(10, 'bold', NAVY); doc.text(t('Anexo · Registro do preenchimento (réplica em HTML)'), M, 12);
       fonte(7.5, 'normal', MUTED);
-      const expl = doc.splitTextToSize(t(`Registro técnico das telas como foram preenchidas na plataforma (código HTML e escolhas), para consulta da ZR3. ${reg.length.toLocaleString('pt-BR')} caracteres.`), CW);
-      doc.text(expl, M, y + 4.5);
-      let ry = y + 4.5 + expl.length * 3.3 + 2;
+      const expl = doc.splitTextToSize(t(`Réplica das telas como foram preenchidas, com o estilo da plataforma, para consulta da ZR3. O arquivo ${nomeReg} está anexado a este PDF (painel de anexos do leitor de PDF). Para recuperar pelo texto: copie do início (<!doctype html>) ao fim (</html>) e salve como .html. ${reg.length.toLocaleString('pt-BR')} caracteres.`), CW);
+      doc.text(expl, M, 16.5);
+      const topo = 16.5 + expl.length * 3.3 + 1, base = H - 8;
 
-      const cwPt = CW / PT, altPt = ALT_MAX / PT;
-      const tam = Math.max(MIN_PT, Math.min(MAX_PT, Math.floor(Math.sqrt((altPt * cwPt) / (0.6 * LH * reg.length)) * 100) / 100));
+      const cwPt = CW / PT, altPt = (base - topo) / PT;
+
+      const POR_PAG = 36000;
+      const tam = Math.max(MIN_PT, Math.min(MAX_PT, Math.floor(Math.sqrt((altPt * cwPt) / (0.6 * LH * Math.min(reg.length, POR_PAG) * 1.04)) * 100) / 100));
       const porLinha = Math.floor(cwPt / (0.6 * tam)), passo = tam * LH * PT;
-      const linhas = []; for (let i = 0; i < reg.length; i += porLinha) linhas.push(reg.slice(i, i + porLinha));
-      doc.setFont('courier', 'normal'); doc.setFontSize(tam); cor([178, 184, 194]);
-      let i = 0;
+      const linhas = quebrarSeguro(reg, porLinha);
+      doc.setFont('courier', 'normal'); doc.setFontSize(tam); cor([150, 158, 170]);
+      let i = 0, ry = topo;
       while (i < linhas.length) {
-        const cabem = Math.max(1, Math.floor((area - ry) / passo));
+        const cabem = Math.max(1, Math.floor((base - ry) / passo));
         const bloco = linhas.slice(i, i + cabem);
-        doc.text(bloco, M, ry + tam * PT, { lineHeightFactor: LH, baseline: 'alphabetic' });
+
+        bloco.forEach((l, k) => doc.text(l, M, ry + tam * PT + k * passo, { baseline: 'alphabetic' }));
         i += bloco.length;
-        if (i < linhas.length) { doc.addPage(); cabecalhoPequeno(); fonte(10, 'bold', NAVY); doc.text(t('Anexo · Registro do preenchimento (continuação)'), M, y); ry = y + 4; doc.setFont('courier', 'normal'); doc.setFontSize(tam); cor([178, 184, 194]); }
+        if (i < linhas.length) { doc.addPage(); ry = 8; doc.setFont('courier', 'normal'); doc.setFontSize(tam); cor([150, 158, 170]); }
       }
     }
 
     const n = doc.getNumberOfPages();
     for (let i = 1; i <= n; i++) {
+      if (regIni && i >= regIni) break;
       doc.setPage(i);
       cor(LINE, 'draw'); doc.line(M, H - 13, W - M, H - 13);
       fonte(7, 'normal', MUTED);

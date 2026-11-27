@@ -69,7 +69,7 @@
       o.demo ? '<span class="badge b-demo">Exemplo</span>' : '',
       REVISAO && o.aRevisar ? '<span class="badge b-rev">A revisar</span>' : ''
     ].join('');
-  const helpBtn = (k) => (k && CFG.glossario[k] ? `<button type="button" class="help" data-act="help" data-k="${k}" aria-label="O que é ${esc(CFG.glossario[k].titulo)}?">${ic('info')}</button>` : '');
+  const helpBtn = (k) => (k && CFG.glossario[k] ? `<button type="button" class="help" data-act="help" data-k="${k}" aria-label="${esc(CFG.glossario[k].pergunta || 'O que é ' + CFG.glossario[k].titulo + '?')}">${ic('info')}</button>` : '');
   let captura = false;
   const img = (src, alt, cls = '') => (src ? `<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" loading="${captura ? 'eager' : 'lazy'}">` : `<div class="${cls} ph" role="img" aria-label="Imagem a definir">${ic('imagem')}<span>Imagem a definir</span></div>`);
 
@@ -268,9 +268,28 @@
   }
   let modalVoltaFoco = null;
 
-  const rolador = () => { const a = document.getElementById('app'); return a && getComputedStyle(a).overflowY === 'auto' ? a : null; };
+  const mqCelular = window.matchMedia ? window.matchMedia('(max-width: 720px)') : null;
+  const rolador = () => (mqCelular && mqCelular.matches ? document.getElementById('app') : null);
   const posRolagem = () => { const r = rolador(); return r ? r.scrollTop : window.scrollY; };
   function rolarPara(top, behavior) { const r = rolador(); const o = { top, behavior: behavior || 'auto' }; if (r) r.scrollTo(o); else window.scrollTo(o); }
+
+  function restaurarRolagem(top) {
+    const r = rolador(), max = r ? r.scrollHeight - r.clientHeight : document.documentElement.scrollHeight - innerHeight;
+    const alvo = Math.max(0, Math.min(top, max));
+    if (r && top > max + 1) {
+      r.style.overflowY = 'hidden'; r.scrollTop = alvo;
+      requestAnimationFrame(() => { r.style.overflowY = ''; r.scrollTop = Math.max(0, r.scrollTop - 1); r.scrollTop += 1; });
+    } else rolarPara(alvo);
+  }
+
+  function renderAncorado(t) {
+    const caixa = t.closest('.linha-box'), id = caixa && caixa.id;
+    render();
+    const el = id && document.getElementById(id);
+    if (!el || el.classList.contains('linha-box')) return;
+    const top = el.getBoundingClientRect().top;
+    if (top < 90 || top > innerHeight * 0.55) rolarPara(Math.max(0, top + posRolagem() - 110));
+  }
   function abrirModal(html, { titulo = '', largo = false } = {}) {
     modalVoltaFoco = document.activeElement;
     $modal.innerHTML = `<div class="overlay" data-act="fechar-modal"></div>
@@ -369,7 +388,7 @@
       ${tela !== 'inicio' ? progresso(e) : ''}
       <main id="conteudo" class="wrap ${tela === 'inicio' ? 'inicio' : ''}" tabindex="-1">${corpo}</main>
       ${tela !== 'inicio' ? barraInferior(e) : ''}`;
-    rolarPara(scroll);
+    restaurarRolagem(scroll);
 
     const faixa = document.querySelector('.tabs.seq'), cur = faixa && faixa.querySelector('.tab.cur');
     if (cur) faixa.scrollLeft = Math.max(0, cur.offsetLeft - faixa.offsetLeft - (faixa.clientWidth - cur.offsetWidth) / 2);
@@ -871,7 +890,7 @@
     if (compacta && ln && ln.completa && !linhasAbertas.has(lid)) {
       const viA = pa ? pa.vi : s._valorInterruptor;
       const precoLn = info || (s.tipo === 'persianas' ? `<span>${viA == null ? 'Valor sob consulta' : '+ ' + brl(viA) + ' por ambiente'}</span>` : `<span>${esc(L.resumoEscolha || 'Pode ser diferente dos outros interruptores da unidade.')}</span>`);
-      return `<div class="linha-res">${img(E.imgLinhaUso(L, ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>${esc(s.linhaRotulo || 'Interruptor da persiana')} ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong>${ln.linha.resumo ? `<span class="lr-desc">${esc(ln.linha.resumo)}</span>` : ''}${precoLn}</div><button type="button" class="btn ghost sm" data-act="linha-trocar" data-lid="${lid}">Trocar</button></div>`;
+      return `<div class="linha-res" id="linha-${s.id}${ambId ? '-' + ambId : ''}">${img(E.imgLinhaUso(L, ln), ln.linha.nome, 'lr-img')}<div class="lr-tx"><small>${esc(s.linhaRotulo || 'Interruptor da persiana')} ${tagProtocolo(ln)}</small><strong>${esc(E.nomeLinha(ln))}</strong>${ln.linha.resumo ? `<span class="lr-desc">${esc(ln.linha.resumo)}</span>` : ''}${precoLn}</div><button type="button" class="btn ghost sm" data-act="linha-trocar" data-lid="${lid}">Trocar</button></div>`;
     }
 
     const tons = E.tons(L), tom = tons.length ? E.tomEscolhido(L, es) : null;
@@ -1360,7 +1379,7 @@
       const ok = g.ln && g.ln.completa;
       const pecas = aux ? '' : ok
         ? `<h4 class="q-t">Peças da linha ${esc(E.nomeLinha(g.ln))}</h4><ul class="qlist card qcompacta">${linhasQtd(e, s, g.itens, g.raw.qtd || {}, false, g.i)}</ul>`
-        : `<p class="note">${ic('info')} Escolha a cor e a linha para ver as peças e os valores.</p>`;
+        : E.tons(s.linhas).length && !E.tomEscolhido(s.linhas, g.raw) ? '' : `<p class="note">${ic('info')} Escolha a linha para ver as peças e os valores.</p>`;
       return `<div class="lgrupo ${multi ? 'multi' : ''}">
         ${multi ? `<div class="lg-head"><strong>${aux ? 'Preferência' : 'Linha'} ${g.i + 1}${g.ln ? ' · ' + esc(E.nomeLinha(g.ln)) : ''}</strong><button type="button" class="btn ghost sm" data-act="grupo-del" data-s="${s.id}" data-g="${g.i}">${ic('x')}<span>Remover</span></button></div>` : ''}
         ${linhaEscolha(e, s, false, g.i)}
@@ -1369,10 +1388,9 @@
     }).join('');
     const ultimo = gs[gs.length - 1];
     const podeAdd = ultimo.ln && ultimo.ln.completa && (aux || Object.values(ultimo.raw.qtd || {}).some((n) => n > 0));
-    return `<div class="card linha-box lb-intro"><h4 class="lb-t">${aux ? 'Linha de preferência dos interruptores' : esc(s.linhas.titulo)}</h4><p class="muted">${aux ? 'Escolha a cor e a linha que você prefere. A equipe da ZR3 faz a contagem das peças e informa os valores na revisão do orçamento.' : esc(s.linhas.descricao)}</p></div>
+    return `${aux ? `<div class="card linha-box lb-intro"><h4 class="lb-t">Linha de preferência dos interruptores</h4><p class="muted">Escolha a cor e a linha que você prefere. A equipe da ZR3 faz a contagem das peças e informa os valores na revisão do orçamento.</p></div>` : ''}
       ${blocos}
-      <button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}" ${podeAdd ? '' : 'disabled'}>${ic('mais')}<span>${aux ? 'Adicionar outra linha de preferência' : 'Adicionar outra linha'}</span></button>
-      ${podeAdd ? '' : `<p class="muted add-linha-dica">${aux ? 'Escolha a cor e a linha desta preferência para adicionar outra.' : 'Para mesclar linhas, escolha as peças desta linha e depois adicione outra.'}</p>`}
+      ${podeAdd ? `<button type="button" class="btn ghost block add-linha" data-act="grupo-add" data-s="${s.id}">${ic('mais')}<span>${aux ? 'Adicionar outra linha de preferência' : 'Adicionar outra linha'}</span></button>` : ''}
       ${aux ? '' : locaisHtml(s)}`;
   }
 
@@ -1757,8 +1775,8 @@
         ${podeShare
           ? `<button type="button" class="btn zap-btn block" data-act="compartilhar">${ic('msg')}<span>Salvar ou compartilhar o PDF com a ZR3</span></button>`
           : ct.whatsapp ? `<a class="btn zap-btn block" target="_blank" rel="noopener" href="https://wa.me/${esc(E.soDigitos(ct.whatsapp))}?text=${msg}">${ic('msg')}<span>Enviar pelo WhatsApp da ZR3</span></a>` : ''}
-        ${ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF)">${ic('mail')}<span>Prefiro enviar por e-mail</span></a>` : ''}
         <p class="hint">${podeShare ? 'Escolha o WhatsApp e a conversa da ZR3: o PDF vai junto com a mensagem.' : 'O PDF foi baixado: anexe-o na conversa com a mensagem pronta.'}</p>
+        ${ct.email ? `<a class="btn ghost sm mail-sec" href="mailto:${esc(ct.email)}?subject=${encodeURIComponent('Personalização 3ª etapa – ' + e.nome + ' – Unidade ' + S.cliente.unidade)}&body=${msg}%0A%0A(anexe o PDF)">${ic('mail')}<span>Prefiro enviar por e-mail</span></a>` : ''}
       </div>
       <div class="proximos"><h3>Depois do envio</h3>
         <ol>
@@ -1862,7 +1880,7 @@
       case 'help': {
         ev.preventDefault(); ev.stopPropagation();
         const g = CFG.glossario[t.dataset.k];
-        if (g) abrirModal(`<p>${esc(g.texto)}</p>`, { titulo: g.titulo });
+        if (g) abrirModal([].concat(g.texto).map((x) => `<p>${esc(x)}</p>`).join(''), { titulo: g.titulo });
         break;
       }
       case 'fechar-modal': fecharModal(); break;
@@ -1940,7 +1958,7 @@
             sincronizarQtd(sg);
           }
           if (g.cor) gruposAbertos.delete(`${sg.id}-${t.dataset.g}`);
-          limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); render();
+          limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); renderAncorado(t);
           break;
         }
         const sl = secDaLinha(e, t.dataset.lid); if (!sl) break;
@@ -1963,7 +1981,7 @@
         sincronizarMarcas(e);
         if (es.cor || !(o.cores || []).length) linhasAbertas.delete(t.dataset.lid);
         erros = erros.filter((x) => !(x.campo.endsWith('-linha') || /interruptor/i.test(x.msg)));
-        salvar(); render();
+        salvar(); renderAncorado(t);
         break;
       }
       case 'item-escolha': {
@@ -2016,11 +2034,11 @@
         break;
       }
       case 'linha-cor': {
-        if (t.dataset.g != null) { const sg = E.secao(e, t.dataset.s, S); gruposEdit(sg)[+t.dataset.g].cor = t.dataset.c; gruposAbertos.delete(`${sg.id}-${t.dataset.g}`); limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); render(); break; }
+        if (t.dataset.g != null) { const sg = E.secao(e, t.dataset.s, S); gruposEdit(sg)[+t.dataset.g].cor = t.dataset.c; gruposAbertos.delete(`${sg.id}-${t.dataset.g}`); limparErro(`${sg.id}-g${t.dataset.g}`); salvar(); renderAncorado(t); break; }
         const sl = secDaLinha(e, t.dataset.lid); if (!sl) break;
         escLinha(t.dataset.lid, sl).cor = t.dataset.c; linhasAbertas.delete(t.dataset.lid);
         erros = erros.filter((x) => !(x.campo.endsWith('-linha') || /interruptor/i.test(x.msg)));
-        salvar(); render();
+        salvar(); renderAncorado(t);
         break;
       }
       case 'linha-trocar':
@@ -2296,10 +2314,10 @@
     if (!ev.target.closest('#un-combo')) comboFechar();
   });
 
-  const ATR_TELA = /^(data-(act|s|v|o|a|i|g|d|k|lid|src|legenda|nota|ad|p|q|n|de|para|tela|bind|bind-texto|loc)|type|tabindex|loading|decoding|role|for|rows|maxlength|placeholder|autocomplete|inputmode|title|aria-(hidden|label|labelledby|live|describedby|invalid|disabled|modal|controls|expanded))$/;
+  const ATR_TELA = /^(data-(act|s|v|o|a|i|g|d|k|lid|src|legenda|nota|ad|p|q|n|de|para|tela|bind|bind-texto|loc|passos)|tabindex|loading|decoding|role|for|maxlength|autocomplete|inputmode|title|aria-(hidden|label|labelledby|live|describedby|invalid|disabled|modal|controls|expanded))$/;
   function limparRegistro(html) {
     const t = document.createElement('template'); t.innerHTML = html;
-    t.content.querySelectorAll('svg, [hidden], .pcard-more, details.more, .thumbs, .gallery ~ .caption, .help, .stepper button, .vid-bar, .add-linha, .add-linha-dica, .copiar, .lstep-acts, [data-act="linha-trocar"], [data-act="goto"], [data-act="grupo-del"], [data-act="sacada-info"], [data-act="protocolos"], [data-act="saiba-q"], .linha-cap, .ext-aviso').forEach((n) => n.remove());
+    t.content.querySelectorAll('[hidden], .pcard-more, details.more, .thumbs, .gallery ~ .caption, .help, .vid-bar, iframe, .copiar, .lstep-acts, [data-act="goto"], [data-act="sacada-info"], [data-act="protocolos"], [data-act="saiba-q"], [data-act="saiba"], [data-act="saiba-m"], .ext-aviso').forEach((n) => n.remove());
     t.content.querySelectorAll('*').forEach((el) => {
       [...el.attributes].forEach((at) => {
         const n = at.name;
@@ -2310,6 +2328,26 @@
       if (!cl) el.removeAttribute('class'); else el.setAttribute('class', cl);
     });
     return t.innerHTML;
+  }
+
+  function cssPlataforma() {
+    return [...document.styleSheets].map((sh) => {
+      try { if (sh.href && !/\/css\/app\.css/.test(sh.href)) return ''; return [...sh.cssRules].map((r) => r.cssText).join(''); } catch (err) { return ''; }
+    }).join('');
+  }
+
+  const asciiHtml = (x) => x.replace(/[^\x00-\x7E]/gu, (c) => '&#x' + c.codePointAt(0).toString(16) + ';');
+  const asciiCss = (x) => x.replace(/[^\x00-\x7E]/gu, (c) => '\\' + c.codePointAt(0).toString(16).padStart(6, '0'));
+  const asciiJson = (x) => x.replace(/[\u007F-￿]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).replace(/</g, '\\u003c');
+
+  const CSS_REGISTRO = 'html,body{height:auto!important;overflow:visible!important}body{padding-bottom:40px}'
+    + '.reg-cab{background:#1B2A4E;color:#fff;padding:14px 0;margin-bottom:8px}.reg-cab .wrap{display:flex;gap:14px;align-items:center}'
+    + '.reg-cab img{height:34px;width:auto}.reg-cab strong{display:block;font-size:17px}.reg-cab span{display:block;font-size:13px;color:#c7d4ea}'
+    + '.reg-etapa{padding-bottom:24px;margin-bottom:24px;border-bottom:2px dashed #c9d1de}#pesquisa{margin-top:8px}'
+    + '#conteudo button,#conteudo input,#conteudo textarea,#conteudo select,#conteudo a{pointer-events:none}';
+  function enderecoBase() {
+    if (/^https?:$/.test(location.protocol)) return location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '');
+    return (CFG.empresa && CFG.empresa.enderecoPlataforma) || '';
   }
 
   function escolhasLimpas(esc) {
@@ -2331,16 +2369,25 @@
     captura = true; erros = []; linhasAbertas.clear();
     try {
       const C0 = '<' + '!--', C1 = '--' + '>', SC = 'scr' + 'ipt';
-      const partes = E.etapas(e, S).map((et) => `${C0} etapa: ${et.id} ${C1}${limparRegistro(telaEtapa(e, et))}`);
-      const cab = `${C0} registro ${protocolo} · ${agora.toISOString()} · versão ${CFG.versao || '—'} · tabela ${codigoTabela} · ${S.cliente.nome} · unidade ${S.cliente.unidade} ${C1}`;
-      const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: escolhasLimpas(S.escolhas), pesquisa: S.pesquisa || null }).replace(/</g, '\\u003c')}</${SC}>`;
+      const quando = agora.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+      const cab = `<header class="reg-cab"><div class="wrap"><img src="${esc(CFG.empresa.logoBranco || CFG.empresa.logo)}" alt="ZR3 Empreendimentos"><div><strong>Registro do preenchimento &middot; ${esc(e.nome)} &middot; unidade ${esc(S.cliente.unidade)}</strong><span>Protocolo ${esc(protocolo)} &middot; ${esc(quando)} &middot; vers&atilde;o ${esc(CFG.versao || '-')} &middot; tabela ${esc(codigoTabela)} &middot; ${esc(S.cliente.nome)}</span></div></div></header>`;
+      const partes = E.etapas(e, S).map((et) => `${C0} etapa: ${et.id} ${C1}<section class="reg-etapa" id="etapa-${et.id}">${limparRegistro(telaEtapa(e, et))}</section>`);
 
       const P = CFG.pesquisa, R = S.pesquisa || {};
-      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] === 'ns' ? esc(q.naoSei || 'Não lembro') : R[q.id] ? R[q.id] + '/5 · ' + esc((q.rotulos || P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
+      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa" class="card"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] === 'ns' ? esc(q.naoSei || 'Não lembro') : R[q.id] ? R[q.id] + '/5 · ' + esc((q.rotulos || P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
 
       const nomes = new Map(Object.entries(window.ZR3_ASSETS || {}).map(([k, v]) => [v, k]));
       const semEmbutidos = (h) => h.replace(/data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]+/gi, (m) => nomes.get(m) || 'data:(arquivo embutido)');
-      return semEmbutidos(cab + partes.join('') + pesq + dados).replace(/[ \t]*\n[ \t]*/g, ' ').replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ');
+      const enxuto = (h) => h.replace(/[ \t]*\n[ \t]*/g, ' ').replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ');
+      const corpo = asciiHtml(enxuto(semEmbutidos(cab + `<main id="conteudo" class="wrap">${partes.join('')}${pesq}</main>`)));
+      const css = asciiCss(enxuto(semEmbutidos(cssPlataforma() + CSS_REGISTRO)));
+      const dados = asciiJson(JSON.stringify({ empId: S.empId, protocolo, geradoEm: agora.toISOString(), versao: CFG.versao || null, tabela: codigoTabela, cliente: S.cliente, escolhas: escolhasLimpas(S.escolhas), pesquisa: S.pesquisa || null }));
+      const base = enderecoBase();
+      const titulo = asciiHtml(esc(`Registro ${protocolo} · ${e.nome} · unidade ${S.cliente.unidade}`));
+      return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`
+        + `${C0} registro ${protocolo} ${C1}<title>${titulo}</title>${base ? `<base href="${esc(base)}">` : ''}`
+        + `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap">`
+        + `<style>${css}</style></head><body>${corpo}<${SC} type="application/json" id="escolhas">${dados}</${SC}></body></html>`;
     } catch (err) {
       console.warn('Registro do preenchimento não gerado:', err);
       return '';

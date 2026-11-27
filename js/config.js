@@ -309,10 +309,11 @@
           ['Formas de acesso', 'Impressão digital, senha, cartão (tag), aplicativo e chave mecânica'],
           ['Conectividade', 'Wi-Fi 2,4 GHz'],
           ['Usuários', 'Até 9 administradores e 300 usuários'],
-          ['Alimentação', '4 pilhas AA; entrada para powerbank (5 V) em emergência'],
+          ['Alimentação', '4 pilhas AA (incluídas); entrada para powerbank (5 V) em emergência'],
           ['Porta', 'Espessura de 35 a 65 mm'],
           ['Dimensões', '264 × 151 × 71,5 mm'],
-          ['Instalação e configuração', 'Incluídas no valor: instalação, configuração, conexão à rede, cadastro de usuários, digitais, tags e senhas']
+          ['Instalação e configuração', 'Incluídas no valor: instalação, configuração, conexão à rede, cadastro de usuários, digitais, tags e senhas'],
+          ['Garantia', '1 ano a partir da data de entrega do empreendimento']
         ],
         valor: 1050
       }
@@ -440,18 +441,18 @@
     aba: 'Interruptores',
     titulo: 'Interruptores e tomadas inteligentes',
     capa: 'assets/img/nd-touchled-branco-tecla-tripla.jpg',
-    resumoCurto: 'Luzes e tomadas pelo interruptor, pelo aplicativo ou por voz.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
+    resumoCurto: 'Luzes e tomadas pelo interruptor, pelo aplicativo ou por voz.', inclui: ['produto', 'instalacao', 'configuracao'],
 
     requer: { secao: 'preparacao', resposta: 'sim', mensagem: 'Os interruptores inteligentes só podem ser escolhidos com a preparação elétrica para automação.' },
-    descricao: 'Permitem ligar luzes e tomadas pelo celular ou por voz. Escolha a cor e a linha e informe quantas peças de cada tipo deseja. O valor de cada peça inclui a instalação e a configuração na rede.',
+    descricao: 'Ligue luzes e tomadas pelo interruptor, pelo celular ou por voz, nos pontos já previstos no projeto da 1ª etapa.',
     linhas: LINHAS_INTERRUPTOR,
     linhasMultiplas: true,
-    nota: 'Somente os pontos pré-existentes no projeto assinado na 1ª etapa de personalização podem receber automação.',
-    ajuda: 'caixa',
+
+    ajuda: 'interruptores',
 
     auxilio: {
       rotulo: 'Tenho interesse, mas preciso de ajuda para quantificar',
-      descricao: 'Marque os ambientes em que deseja automatizar. A equipe da ZR3 fará a contagem correta dos circuitos e das peças necessárias e incluirá no orçamento.',
+      descricao: 'Marque os ambientes e a ZR3 faz a contagem das peças e inclui no orçamento.',
       ambientes: ['Living', 'Quarto de solteiro', 'Suíte', 'Banheiro social', 'Banheiro suíte', 'Sacada'],
 
       ambientesPorGrupo: {
@@ -784,6 +785,18 @@
     neutro: { titulo: 'Condutor neutro', texto: 'É o fio que fecha o circuito elétrico junto com a fase. Interruptores inteligentes precisam dele na caixa para ficarem sempre energizados e conectados à rede.' },
     zigbee: { titulo: 'Zigbee', texto: 'Protocolo sem fio de baixo consumo, próprio para automação. Os dispositivos se conectam a um hub em vez de ao roteador, o que melhora a estabilidade em casas com muitas automações.' },
     wifi: { titulo: 'Wi-Fi', texto: 'Os dispositivos se conectam diretamente ao roteador da casa. Não precisam de hub, mas cada um ocupa uma conexão da rede.' },
+
+    interruptores: {
+      titulo: 'Interruptores inteligentes', pergunta: 'Como funcionam os interruptores inteligentes?',
+      texto: [
+        'Ligam luzes e tomadas pelo próprio interruptor, pelo aplicativo no celular ou por voz (com a assistente de voz).',
+        'Como escolher: primeiro a cor, depois a linha e, por fim, quantas peças de cada tipo. O valor de cada peça já inclui a instalação e a configuração na rede.',
+        'Mais de uma linha: depois de escolher as peças da primeira linha, toque em “Adicionar outra linha” para mesclar linhas diferentes.',
+        'Somente os pontos que já existem no projeto assinado na 1ª etapa de personalização podem receber automação.',
+        'A passagem de fiação (preparação elétrica) é obrigatória e cobrada à parte, na aba Preparação elétrica.',
+        'Caixa 4x2 e 4x4: tamanhos das caixas embutidas na parede. A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.'
+      ]
+    },
     caixa: { titulo: 'Caixa 4x2 e 4x4', texto: 'São os tamanhos das caixas embutidas na parede (em polegadas). A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.' },
     alexa: { titulo: 'Assistente de voz', texto: 'Aparelho que obedece a comandos falados e controla os dispositivos inteligentes compatíveis. O aparelho deve ser adquirido por você; a ZR3 oferece a programação das cenas e rotinas.' },
     cub: { titulo: 'CUB', texto: 'Custo Unitário Básico da construção civil. No pagamento parcelado, as parcelas são reajustadas mensalmente pelo CUB.' },
@@ -953,13 +966,15 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.5',
+    versao: '1.6',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',
       telefone: '(47) 4101-0499',
       email: 'projetos@zr3empreendimentos.com.br',
       site: 'www.zr3empreendimentos.com.br',
+
+      enderecoPlataforma: 'https://projetoszr3.github.io/zr3-personalizacao/',
       instagram: '@zr3empreendimentos',
       logo: 'assets/img/logo-zr3.png',
       logoBranco: 'assets/img/logo-zr3-branco.png'

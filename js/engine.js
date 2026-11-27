@@ -165,12 +165,6 @@
 
   E.coresNoTom = (L, o, tomId) => { const t = E.tons(L).find((x) => x.id === tomId); return t ? (o.cores || []).filter((c) => t.cores.includes(c.id)) : (o.cores || []); };
 
-  E.fotosLinha = (ln) => {
-    const porCor = ln && ln.linha.imagens && ln.cor ? ln.linha.imagens[ln.cor.id] || {} : {};
-    const ent = Object.entries(porCor);
-    return ent.filter(([, src], i) => !ent.slice(i + 1).some(([, s2]) => s2 === src)).map(([peca, src]) => ({ peca, src }));
-  };
-
   E.chaveLinha = (sec, ambId) => (sec && sec.linhasPorAmbiente && ambId ? `${sec.linhas.id}-${ambId}` : sec.linhas.id);
   E.linhaEscolhida = (S, sec, ambId) => {
     const L = sec && sec.linhas;

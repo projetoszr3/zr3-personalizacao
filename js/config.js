@@ -438,7 +438,7 @@
     tipo: 'quantidades',
     id: 'auto-interruptores',
     aba: 'Interruptores',
-    titulo: 'Interruptores e tomadas automatizados',
+    titulo: 'Interruptores e tomadas inteligentes',
     capa: 'assets/img/nd-touchled-branco-tecla-tripla.jpg',
     resumoCurto: 'Luzes e tomadas pelo interruptor, pelo aplicativo ou por voz.', inclui: ['produto', 'instalacao', 'configuracao'], naoInclui: 'a passagem de fiação (preparação elétrica), que é obrigatória e cobrada à parte',
 
@@ -495,7 +495,7 @@
 
     aceite: {
       titulo: 'Escopo da preparação elétrica para automação',
-      texto: 'Inclui somente a passagem do neutro nas caixas de interruptor dos pontos de iluminação. Não inclui produtos, cabeamento de rede, hubs nem automação cabeada. Dispositivos comprados por conta própria são de responsabilidade do cliente.',
+      texto: 'Inclui somente a passagem do neutro nas caixas de interruptor dos pontos de iluminação. Não inclui produtos, cabeamento de rede, hubs nem automação cabeada. Dispositivos comprados por conta própria são de sua responsabilidade.',
       rotulo: 'Li e aceito o escopo da preparação elétrica para automação.'
     }
   };
@@ -523,7 +523,7 @@
       titulo: 'Formas possíveis de acionar',
       padrao: { rotulo: 'Aplicativo no celular', descricao: 'Sempre incluído: liga e desliga o exaustor central de onde você estiver.' },
       opcoes: [
-        { id: 'voz', rotulo: 'Voz', descricao: 'Exige a programação da assistente de voz, que já fica marcada na aba dela.',
+        { id: 'voz', rotulo: 'Voz', descricao: 'Exige a criação de cenas e rotinas, que já fica marcada na aba Assistente de voz.',
           marca: { secao: 'alexa', resposta: 'sim', mensagem: 'Para acionar o exaustor por voz, é necessária a programação da assistente de voz.', acao: 'Mantenha a programação ou mude a forma de acionamento na aba Exaustor.' } },
         { id: 'interruptor', rotulo: 'Interruptor na churrasqueira', descricao: 'O interruptor ao lado da churrasqueira é trocado por um inteligente, na linha e na cor escolhidas, com uma tecla para os exaustores.',
           destaque: 'Vantagem: apenas uma tecla liga os dois exaustores juntos, o central e o da sua churrasqueira.' }
@@ -545,19 +545,19 @@
     },
     blocos: [
       { titulo: 'Exaustores: central e da churrasqueira', texto: 'São dois equipamentos: o exaustor central, na cobertura, atende todas as churrasqueiras do mesmo final de apartamento; o exaustor da sua churrasqueira fica na coifa e hoje liga junto com a luz interna dela. Os dois precisam estar ligados para a tiragem funcionar bem.' },
-      { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido pelo cliente'] }
+      { titulo: 'O que a automação faz', itens: ['Instala um módulo inteligente no comando do exaustor central, na caixa de comando da cobertura', 'O aplicativo liga e desliga o exaustor central de qualquer lugar (incluído em todas as formas)', 'Com o interruptor na churrasqueira, uma tecla liga os dois exaustores juntos', 'Por voz, é preciso a programação da assistente de voz e um aparelho da assistente, adquirido por você'] }
     ]
   };
 
   const ALEXA = {
     tipo: 'opcional',
     id: 'alexa',
-    aba: 'Programação da assistente de voz',
+    aba: 'Assistente de voz',
     cheki: '4.9.1',
-    titulo: 'Programação da assistente de voz',
-    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho da assistente de voz, o qual deve ser adquirido pelo cliente',
+    titulo: 'Assistente de voz: criação de cenas e rotinas',
+    resumoCurto: 'Cenas e rotinas por voz, como “boa noite” apaga tudo.', inclui: ['cenas'], naoInclui: 'o aparelho da assistente de voz, o qual deve ser adquirido por você',
     nome: 'Criação de cenas e rotinas',
-    descricao: 'Programar comandos combinados na assistente de voz, como apagar as luzes e fechar as persianas simultaneamente ao falar “boa noite”. Sem essa programação, os dispositivos continuam funcionando normalmente pelo interruptor e pelo aplicativo; apenas os comandos combinados por voz não ficam configurados. O aparelho da assistente de voz deve ser adquirido pelo cliente.',
+    descricao: 'Programar comandos combinados na assistente de voz, como apagar as luzes e fechar as persianas simultaneamente ao falar “boa noite”. Sem essa programação, os dispositivos continuam funcionando normalmente pelo interruptor e pelo aplicativo; apenas os comandos combinados por voz não ficam configurados. O aparelho da assistente de voz deve ser adquirido por você.',
     imagem: 'assets/img/echo-dot.jpg',
     valor: 75,
     ajuda: 'alexa',
@@ -565,7 +565,7 @@
     rotuloNao: 'Não quero',
     blocos: [
       { titulo: 'O que está incluído', itens: ['Integração dos dispositivos automatizados da unidade à assistente de voz', 'Criação de cenas e rotinas (ex.: “boa noite” apaga as luzes e fecha as persianas)', 'Comandos de voz para luzes, tomadas e persianas automatizadas'] },
-      { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz, o qual deve ser adquirido pelo cliente', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta no aplicativo da assistente de voz, no celular'] },
+      { titulo: 'O que é necessário', itens: ['Aparelho da assistente de voz, o qual deve ser adquirido por você', 'Energia elétrica ligada na unidade', 'Rede Wi-Fi instalada e funcionando na unidade', 'Conta no aplicativo da assistente de voz, no celular'] },
       { titulo: 'Limites e funcionamento da integração', itens: ['Só são integrados dispositivos compatíveis com a assistente de voz.', 'A programação é feita na visita técnica gratuita.', 'Visitas adicionais podem ser cobradas diretamente pelo fornecedor.'] }
     ]
   };
@@ -671,7 +671,7 @@
     titulo: 'Persiana automatizada integrada à janela',
     descricao: 'As janelas dos dormitórios são entregues com a caixa para persiana. Como opcional, a construtora oferece a persiana motorizada, que abre e fecha pelo interruptor, pelo aplicativo ou por voz. Ela é adquirida junto com um interruptor inteligente, pago à parte: a tecla mais básica é a Touch - Vidro (Wi-Fi).',
 
-    aviso: 'A persiana é instalada sempre com a tecla automatizada (interruptor inteligente). A construtora não trabalha com o acionador comum de persiana.',
+    aviso: 'A persiana é instalada sempre com o interruptor inteligente. A construtora não trabalha com o acionador comum de persiana.',
     linhas: LINHAS_PERSIANA,
     linhasPorAmbiente: true,
     pecaLinha: 'persiana',
@@ -701,7 +701,7 @@
           ['Padrão de entrega', 'Esquadria com caixa para persiana integrada'],
           ['Persiana', 'Motorizada, oferecida e instalada pela construtora'],
           ['Interruptor', 'Pago à parte e adquirido junto com a persiana, na linha e na cor escolhidas para cada ambiente. Mínimo: Touch - Vidro (Wi-Fi). Interruptor próprio de persiana na Touch - Vidro; de 3 teclas nas demais'],
-          ['Acionador comum', 'Não disponível: a persiana é instalada sempre com a tecla automatizada'],
+          ['Acionador comum', 'Não disponível: a persiana é instalada sempre com o interruptor inteligente'],
           ['Instalação e configuração', 'Incluídas no valor (configuração na rede na visita técnica gratuita)'],
           ['Automação', 'Já preparada; a persiana funciona com ou sem automação'],
           ['Acionamento', 'Interruptor, aplicativo ou comando de voz'],
@@ -734,7 +734,7 @@
       'Os banheiros sempre recebem revestimento; por isso, as portas desses ambientes são instaladas normalmente.',
       'Nos quartos, a instalação não pode ser feita sem o piso acabado, pois a porta precisa da referência de nível do piso.',
       'Por isso, você recebe um crédito de R$ 100,00 de mão de obra por porta de quarto que deixa de ser instalada.',
-      'A instalação posterior das portas dos quartos fica por conta do cliente.'
+      'A instalação posterior das portas dos quartos fica por sua conta.'
     ]
   };
 
@@ -785,7 +785,7 @@
     zigbee: { titulo: 'Zigbee', texto: 'Protocolo sem fio de baixo consumo, próprio para automação. Os dispositivos se conectam a um hub em vez de ao roteador, o que melhora a estabilidade em casas com muitas automações.' },
     wifi: { titulo: 'Wi-Fi', texto: 'Os dispositivos se conectam diretamente ao roteador da casa. Não precisam de hub, mas cada um ocupa uma conexão da rede.' },
     caixa: { titulo: 'Caixa 4x2 e 4x4', texto: 'São os tamanhos das caixas embutidas na parede (em polegadas). A 4x2 é a retangular comum; a 4x4 é quadrada e comporta a tecla sêxtupla.' },
-    alexa: { titulo: 'Assistente de voz', texto: 'Aparelho que obedece a comandos falados e controla os dispositivos inteligentes compatíveis. O aparelho deve ser adquirido pelo cliente; a ZR3 oferece a programação das cenas e rotinas.' },
+    alexa: { titulo: 'Assistente de voz', texto: 'Aparelho que obedece a comandos falados e controla os dispositivos inteligentes compatíveis. O aparelho deve ser adquirido por você; a ZR3 oferece a programação das cenas e rotinas.' },
     cub: { titulo: 'CUB', texto: 'Custo Unitário Básico da construção civil. No pagamento parcelado, as parcelas são reajustadas mensalmente pelo CUB.' },
     consulta: { titulo: 'Sob consulta', texto: 'O valor depende de uma definição da ZR3: por exemplo, quando você pediu para a equipe escolher o modelo, pediu ajuda para quantificar ou ainda falta confirmar uma informação da sua unidade. Sua escolha fica registrada e a ZR3 informa o valor na revisão do orçamento, antes da sua aprovação.' }
   };
@@ -871,7 +871,7 @@
 
         { id: 'persianas', titulo: 'Persianas', curto: 'Persianas', icone: 'persiana', intro: 'Escolha, para cada ambiente, se deseja a persiana automatizada.', abas: 'sequencial', abasAmbientes: true, secoes: [PERSIANAS] },
         { id: 'vasos', titulo: 'Vasos sanitários', curto: 'Vasos', icone: 'vaso', intro: 'Escolha o modelo de cada banheiro da sua unidade.', video: { arquivo: 'assets/video/video-vasos.mp4', capa: 'assets/video/video-vasos.jpg', titulo: 'Vasos sanitários', inicio: 0 }, abas: 'sequencial', abaUnidade: 'banheiro', secoes: [VASO_SUITE, VASO_SOCIAL] },
-        { id: 'acabamentos', titulo: 'Interruptores e acabamentos', curto: 'Acabamentos', icone: 'interruptor', intro: 'Escolha o modelo de espelho dos interruptores e tomadas.', secoes: [ESPELHOS] },
+        { id: 'acabamentos', titulo: 'Acabamento de interruptores e tomadas', curto: 'Acabamentos', icone: 'interruptor', intro: 'Escolha o modelo de espelho dos interruptores e tomadas.', secoes: [ESPELHOS] },
         { id: 'automacao', titulo: 'Automação residencial', curto: 'Automação', icone: 'automacao', intro: 'Controle luzes, persianas, fechadura e aparelhos pelo celular, por voz ou por cenas programadas. Monte a automação conforme a sua rotina, do básico ao completo. Cada item mostra o que está incluído e o que é necessário para funcionar.', videoSoIntro: true, video: { arquivo: 'assets/video/video-automacao.mp4', capa: 'assets/video/video-automacao.jpg', titulo: 'Automação residencial', inicio: 0 }, abas: 'sequencial',
 
           servicos: {
@@ -887,7 +887,7 @@
           },
 
           secoes: [COMO_FUNCIONA_AUTOMACAO, PREPARACAO, FECHADURA, EXAUSTOR, AUTO_INTERRUPTORES, ALEXA, OUTROS_INTELIGENTES, HUB_ZIGBEE, CONTROLE_UNIVERSAL] },
-        { id: 'complementares', titulo: 'Diversos', curto: 'Diversos', icone: 'edit', intro: 'Último passo antes da revisão.', secoes: [OBSERVACOES] }
+        { id: 'complementares', titulo: 'Observações', curto: 'Observações', icone: 'edit', intro: 'Último passo antes da revisão.', foraDaVisaoGeral: true, secoes: [OBSERVACOES] }
       ],
 
       creditos: [
@@ -953,7 +953,7 @@
 
   window.ZR3_CONFIG = {
 
-    versao: '1.4',
+    versao: '1.5',
     empresa: {
       nome: 'ZR3 Empreendimentos',
       endereco: 'Rua José de Alencar, 36 – América, Joinville/SC',
@@ -973,7 +973,7 @@
     textos: {
       boasVindasTitulo: 'Bem-vindo à terceira etapa da personalização!',
       boasVindasTexto: 'Nesta etapa você define o fechamento de sacada, os acabamentos e os recursos de automação do seu apartamento. Conheça cada opção, veja fotos e especificações e registre as suas preferências.',
-      avisoPdf: 'Este documento é um PRÉ-ORÇAMENTO e registra as preferências indicadas pelo cliente. O orçamento definitivo será enviado junto com o projeto para aprovação; somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura. Itens sob consulta dependem de orçamento e análise técnica.',
+      avisoPdf: 'Este documento é um PRÉ-ORÇAMENTO e registra as preferências que você indicou. O orçamento definitivo será enviado junto com o projeto para aprovação; somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura. Itens sob consulta dependem de orçamento e análise técnica.',
     },
 
     regrasGerais: [
@@ -981,7 +981,7 @@
       'Pré-orçamento: esta plataforma gera um pré-orçamento com as suas preferências. O orçamento definitivo será enviado a você junto com o projeto, para aprovação. Somente após essa aprovação a personalização é validada e a ZR3 envia o aditivo contratual para assinatura.',
       'Unidade: confirme qual é a unidade que está sendo personalizada, pois os itens são disponibilizados de acordo com o final da unidade. Em caso de dúvida, consulte o seu contrato de compra e venda ou fale com a ZR3.',
       'Envio: para que a ZR3 receba as suas escolhas, é necessário enviar o PDF gerado ao final à equipe de personalização. Sem esse envio, as escolhas ficam salvas apenas neste dispositivo.',
-      'Prazo: se o cliente não retornar dentro do prazo, o projeto no padrão da construtora é enviado à obra e não é possível garantir que as escolhas ainda possam ser atendidas.',
+      'Prazo: se você não retornar dentro do prazo, o projeto no padrão da construtora é enviado à obra e não é possível garantir que as escolhas ainda possam ser atendidas.',
       'Alterações após o aditivo: estão sujeitas à taxa de revisão de projeto ({taxaRevisao}) e à análise de viabilidade da obra; se forem possíveis, podem gerar custos de retrabalho.',
       'Atendimento: é feito online, pelo WhatsApp. Em caso de dúvidas, fale conosco.'
     ],
@@ -992,8 +992,8 @@
       perguntas: [
         { id: 'geral', texto: 'De modo geral, como você avalia o funcionamento desta plataforma de personalização?' },
 
-        { id: 'etapa1', texto: 'Comparado à 1ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'] },
-        { id: 'etapa2', texto: 'Comparado à 2ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'] }
+        { id: 'etapa1', tipo: 'comparativa', texto: 'Comparado à 1ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'], naoSei: 'Não lembro / não participei' },
+        { id: 'etapa2', tipo: 'comparativa', texto: 'Comparado à 2ª etapa de personalização, o funcionamento desta etapa foi:', rotulos: ['Muito pior', 'Pior', 'Igual', 'Melhor', 'Muito melhor'], naoSei: 'Não lembro / não participei' }
       ],
       rotulos: ['Muito ruim', 'Ruim', 'Regular', 'Bom', 'Muito bom']
     },

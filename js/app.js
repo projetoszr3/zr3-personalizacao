@@ -500,7 +500,7 @@
       </div>
       <section class="card etapas-ov">
         <h2>O que você vai definir</h2>
-        <ul class="chips">${etapas.filter((et) => et.id !== 'anteriores').map((et) => `<li>${ic(et.icone)}<span>${esc(et.titulo)}</span></li>`).join('')}</ul>
+        <ul class="chips">${etapas.filter((et) => et.id !== 'anteriores' && !et.foraDaVisaoGeral).map((et) => `<li>${ic(et.icone)}<span>${esc(et.titulo)}</span></li>`).join('')}</ul>
       </section>
       <section class="card regras-card regras-topo"><h2>${ic('info')} Instruções gerais</h2>${regrasHtml(true)}${linkWhats(e)}</section>
       <footer class="foot">${esc(CFG.empresa.nome)} · ${esc(CFG.empresa.endereco)} · ${esc(CFG.empresa.telefone)}<br><span class="muted">Versão ${esc(CFG.versao || '—')} · Tabela de valores ${esc(E.codigoTabela(CFG))}</span></footer>
@@ -1276,12 +1276,6 @@
       ${s.nota ? `<div class="callout info">${ic('info')}<p>${esc(s.nota)}</p></div>` : ''}`;
   }
 
-  function precoSecao(x) {
-    if (x.tipo === 'opcional') return x.valor == null ? 'Valor sob consulta' : '+ ' + brl(x.valor);
-    if (x.tipo === 'unica') { const v = (x.opcoes || []).filter(E.ativo).map((p) => p.valor).filter((v) => v != null); return v.length ? (v.length > 1 ? 'a partir de ' : '+ ') + brl(Math.min(...v)) : 'Valor sob consulta'; }
-    if (x.tipo === 'quantidades') { if (x.linhas) return 'Valor por peça, conforme a linha'; const v = (x.itens || []).filter(E.ativo).map((it) => it.valor).filter((v) => v != null); return v.length ? (v.length > 1 ? 'a partir de ' : '') + brl(Math.min(...v)) + (v.length > 1 ? '' : ' cada') : 'Valor sob consulta'; }
-    return '';
-  }
   function capaSecao(x) {
     if (x.capa) return x.capa;
     if (x.imagem) return x.imagem;
@@ -1548,7 +1542,8 @@
     const valor = mSel && mSel.valor;
     const pa = s._porAmb ? s._porAmb[a.id] : { ln: s._linha, vi: s._valorInterruptor };
     const vi = s.linhas ? pa.vi : 0;
-    const precoTxt = valor == null ? 'Valor sob consulta' : '+ ' + brl(valor + (vi || 0)) + (s.linhas && vi == null ? ' + interruptor (conforme a linha)' : '');
+
+    const precoTxt = valor == null ? 'Valor sob consulta' : brl(valor) + (s.linhas ? ' + interruptor conforme a linha' : '');
 
     const bInt = brinde ? E.brindeInterruptor(S, e, s, a.id) : null;
     const bLinha = bInt ? s.linhas.opcoes.find((x) => x.id === bInt.linha) : null;
@@ -1676,7 +1671,7 @@
         const linhas = ls.length
           ? ls.map((l) => {
               const st = E.STATUS[l.status];
-              const val = l.status === 'nao' || l.status === 'info' ? '—' : l.valTexto ? esc(l.valTexto) : l.total == null ? 'Sob consulta' : l.total < 0 ? '− ' + brl(-l.total) : brl(l.total);
+              const val = l.status === 'nao' || l.status === 'info' ? '—' : l.valTexto ? esc(l.valTexto).replace(/ \/ (\S+)$/, '<small>por $1</small>') : l.total == null ? 'Sob consulta' : l.total < 0 ? '− ' + brl(-l.total) : brl(l.total);
               return `<li class="rline ${l.status}">
                 <span class="r-img">${l.imagem ? `<img src="${esc(l.imagem)}" alt="" loading="lazy">` : ic(l.acrescimo ? 'mais' : et.icone)}</span>
                 <span class="r-tx"><strong>${esc(l.item)}${l.qtd > 1 ? ` <span class="qtd">× ${l.qtd}</span>` : ''}</strong><small>${esc(l.detalhe)}</small></span>
@@ -1740,7 +1735,9 @@
     const P = CFG.pesquisa; if (!P || !(P.perguntas || []).length || captura) return '';
     const r = S.pesquisa || {};
     return `<section class="card rgroup pesquisa"><div class="rgroup-h"><h2>${ic('star')} ${esc(P.titulo)}</h2></div>${P.texto ? `<p class="muted">${esc(P.texto)}</p>` : ''}
-      ${P.perguntas.map((q) => { const v = r[q.id] || 0, rot = q.rotulos || P.rotulos || []; return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="stars" role="radiogroup" aria-label="${esc(q.texto)}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} de 5: ${esc(rot[n - 1] || '')}" data-act="pesquisa" data-q="${q.id}" data-n="${n}">${ic('star')}</button>`).join('')}<span class="pq-r">${v ? esc(rot[v - 1] || '') : ''}</span></div><div class="pq-esc"><span>${esc(rot[0] || '')}</span><span>${esc(rot[4] || '')}</span></div></div>`; }).join('')}
+      ${P.perguntas.map((q) => { const v = r[q.id] || 0, rot = q.rotulos || P.rotulos || [];
+        if (q.tipo === 'comparativa') return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="chips pq-comp" role="radiogroup" aria-label="${esc(q.texto)}">${rot.map((t, i) => `<button type="button" class="chip ${v === i + 1 ? 'on' : ''}" role="radio" aria-checked="${v === i + 1}" data-act="pesquisa" data-q="${q.id}" data-n="${i + 1}">${esc(t)}</button>`).join('')}${q.naoSei ? `<button type="button" class="chip pq-ns ${v === 'ns' ? 'on' : ''}" role="radio" aria-checked="${v === 'ns'}" data-act="pesquisa" data-q="${q.id}" data-n="ns">${esc(q.naoSei)}</button>` : ''}</div></div>`;
+        return `<div class="pq"><p class="pq-t">${esc(q.texto)}</p><div class="stars" role="radiogroup" aria-label="${esc(q.texto)}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= v ? 'on' : ''}" role="radio" aria-checked="${n === v}" aria-label="${n} de 5: ${esc(rot[n - 1] || '')}" data-act="pesquisa" data-q="${q.id}" data-n="${n}">${ic('star')}</button>`).join('')}<span class="pq-r">${v ? esc(rot[v - 1] || '') : ''}</span></div><div class="pq-esc"><span>${esc(rot[0] || '')}</span><span>${esc(rot[4] || '')}</span></div></div>`; }).join('')}
       </section>`;
   }
   function msgWhats(e) {
@@ -1848,7 +1845,6 @@
         fecharModal(); ir('identificacao'); toast('Escolhas apagadas.');
         break;
       case 'avancar': avancar(); break;
-      case 'aba-prox': avancar(); break;
       case 'aba-ant': voltar(); break;
       case 'voltar': voltar(); break;
       case 'sacada-info': {
@@ -1997,7 +1993,7 @@
         limparErro(sid); limparErro(sid + '-aux'); salvar(); render(); break;
       }
       case 'pesquisa': {
-        S.pesquisa = S.pesquisa || {}; const q = t.dataset.q, n = +t.dataset.n;
+        S.pesquisa = S.pesquisa || {}; const q = t.dataset.q, n = t.dataset.n === 'ns' ? 'ns' : +t.dataset.n;
         S.pesquisa[q] = S.pesquisa[q] === n ? 0 : n;
         S.pesquisa.em = new Date().toISOString(); salvar(false); render(); break;
       }
@@ -2300,7 +2296,7 @@
     if (!ev.target.closest('#un-combo')) comboFechar();
   });
 
-  const ATR_TELA = /^(data-(act|s|v|o|a|i|g|d|k|lid|src|legenda|nota|ad|p|q|n|de|para|tela|bind|bind-texto|loc|gobs)|type|tabindex|loading|decoding|role|for|rows|maxlength|placeholder|autocomplete|inputmode|title|aria-(hidden|label|labelledby|live|describedby|invalid|disabled|modal|controls|expanded))$/;
+  const ATR_TELA = /^(data-(act|s|v|o|a|i|g|d|k|lid|src|legenda|nota|ad|p|q|n|de|para|tela|bind|bind-texto|loc)|type|tabindex|loading|decoding|role|for|rows|maxlength|placeholder|autocomplete|inputmode|title|aria-(hidden|label|labelledby|live|describedby|invalid|disabled|modal|controls|expanded))$/;
   function limparRegistro(html) {
     const t = document.createElement('template'); t.innerHTML = html;
     t.content.querySelectorAll('svg, [hidden], .pcard-more, details.more, .thumbs, .gallery ~ .caption, .help, .stepper button, .vid-bar, .add-linha, .add-linha-dica, .copiar, .lstep-acts, [data-act="linha-trocar"], [data-act="goto"], [data-act="grupo-del"], [data-act="sacada-info"], [data-act="protocolos"], [data-act="saiba-q"], .linha-cap, .ext-aviso').forEach((n) => n.remove());
@@ -2340,7 +2336,7 @@
       const dados = `<${SC} type="application/json" id="escolhas">${JSON.stringify({ empId: S.empId, cliente: S.cliente, escolhas: escolhasLimpas(S.escolhas), pesquisa: S.pesquisa || null }).replace(/</g, '\\u003c')}</${SC}>`;
 
       const P = CFG.pesquisa, R = S.pesquisa || {};
-      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] ? R[q.id] + '/5 · ' + esc((q.rotulos || P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
+      const pesq = P && (P.perguntas || []).some((q) => R[q.id]) ? `${C0} pesquisa de satisfação ${C1}<section id="pesquisa"><h2>${esc(P.titulo)}</h2><ul>${P.perguntas.map((q) => `<li>${esc(q.texto)} <strong data-nota="${R[q.id] || ''}">${R[q.id] === 'ns' ? esc(q.naoSei || 'Não lembro') : R[q.id] ? R[q.id] + '/5 · ' + esc((q.rotulos || P.rotulos || [])[R[q.id] - 1] || '') : 'sem resposta'}</strong></li>`).join('')}</ul></section>` : '';
 
       const nomes = new Map(Object.entries(window.ZR3_ASSETS || {}).map(([k, v]) => [v, k]));
       const semEmbutidos = (h) => h.replace(/data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]+/gi, (m) => nomes.get(m) || 'data:(arquivo embutido)');

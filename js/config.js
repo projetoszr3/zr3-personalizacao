@@ -975,7 +975,7 @@
       email: 'projetos@zr3empreendimentos.com.br',
       site: 'www.zr3empreendimentos.com.br',
 
-      enderecoPlataforma: 'https://projetoszr3.github.io/zr3-personalizacao/',
+      enderecoPlataforma: 'https://projetoszr3.github.io/zr3-personalizacao-3/',
       instagram: '@zr3empreendimentos',
       logo: 'assets/img/logo-zr3.png',
       logoBranco: 'assets/img/logo-zr3-branco.png'
